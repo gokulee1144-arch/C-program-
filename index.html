@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CForge – Master C by seeing memory</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050b14;--panel:#0b1626;--line:#173049;--ink:#e6f4ff;--mute:#8fb0c7;--cy:#00ffc8;--bl:#00b3ff;--or:#ff7a00;--rd:#ff3b5c;--pu:#a66bff;
+--ui:"Space Grotesk",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,Consolas,monospace;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--ui);min-height:100vh}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px}
+/* 3D buttons */
+.b3{border:0;padding:12px 22px;border-radius:12px;font-weight:700;color:#00141c;background:linear-gradient(135deg,var(--cy),var(--bl));box-shadow:0 6px 0 #00806a,0 12px 24px rgba(0,255,200,.25);transition:transform .15s,box-shadow .15s}
+.b3:hover{transform:translateY(-3px);box-shadow:0 9px 0 #00806a,0 18px 32px rgba(0,255,200,.4)}
+.b3:active{transform:translateY(5px);box-shadow:0 1px 0 #00806a}
+.b3.or{background:linear-gradient(135deg,#ffb347,var(--or));box-shadow:0 6px 0 #a34d00,0 12px 24px rgba(255,122,0,.25)}
+.b3.or:hover{box-shadow:0 9px 0 #a34d00,0 18px 32px rgba(255,122,0,.4)}
+.b3.or:active{box-shadow:0 1px 0 #a34d00}
+.b3.pu{background:linear-gradient(135deg,#c9a4ff,var(--pu));box-shadow:0 6px 0 #5a2fa6}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 14px;color:var(--mute)}
+.ghost:hover,.ghost.on{border-color:var(--cy);color:var(--cy)}
+/* entry */
+#enter{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 40%,#08233a,#02060c 70%);overflow:hidden;transition:transform .9s cubic-bezier(.7,0,.3,1),opacity .9s}
+#enter.go{transform:scale(3);opacity:0;pointer-events:none}
+.floor{position:absolute;left:-50%;right:-50%;bottom:-10%;height:60%;background-image:linear-gradient(rgba(0,255,200,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,200,.18) 1px,transparent 1px);background-size:56px 56px;transform:perspective(420px) rotateX(68deg);animation:fl 5s linear infinite;mask-image:linear-gradient(transparent,#000 60%)}
+@keyframes fl{to{background-position:0 56px}}
+.sym{position:absolute;font-family:var(--mono);color:var(--cy);opacity:.4;text-shadow:0 0 14px var(--cy);animation:fy 7s ease-in-out infinite}
+@keyframes fy{50%{transform:translateY(-26px) rotate(7deg)}}
+.scene{perspective:700px;width:120px;height:120px;margin:0 auto 20px;position:relative;z-index:2}
+.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:rot 9s linear infinite}
+@keyframes rot{to{transform:rotateX(360deg) rotateY(360deg)}}
+.cube i{position:absolute;inset:0;display:grid;place-items:center;font:700 54px var(--mono);font-style:normal;color:var(--cy);border:2px solid var(--cy);background:rgba(0,255,200,.07);box-shadow:inset 0 0 24px rgba(0,255,200,.3),0 0 20px rgba(0,255,200,.2)}
+.cube i:nth-child(1){transform:translateZ(60px)}.cube i:nth-child(2){transform:rotateY(180deg) translateZ(60px)}
+.cube i:nth-child(3){transform:rotateY(90deg) translateZ(60px)}.cube i:nth-child(4){transform:rotateY(-90deg) translateZ(60px)}
+.cube i:nth-child(5){transform:rotateX(90deg) translateZ(60px)}.cube i:nth-child(6){transform:rotateX(-90deg) translateZ(60px)}
+#enter h1{font-size:clamp(2.4rem,8vw,4.5rem);letter-spacing:.04em;position:relative;z-index:2}
+#enter p.t{color:var(--mute);max-width:34ch;margin:8px auto 24px;position:relative;z-index:2}
+#boot{font:13px var(--mono);color:#7ef9dd;min-height:20px;margin-top:20px;position:relative;z-index:2}
+/* app */
+#app{display:none}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;gap:6px;align-items:center;overflow-x:auto;padding:10px 14px;background:rgba(5,11,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav b{font:700 18px var(--mono);color:var(--cy);margin-right:8px;white-space:nowrap}
+nav a{color:var(--mute);text-decoration:none;padding:6px 12px;border-radius:8px;white-space:nowrap;font-size:14px}
+nav a.on{background:var(--panel);color:var(--cy)}
+main{max-width:980px;margin:0 auto;padding:20px 16px 90px}
+h2{font-size:1.6rem;margin-bottom:12px}h3{font-size:1.1rem;margin:16px 0 6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat b{display:block;font:700 2rem var(--mono);color:var(--cy)}.stat span{color:var(--mute);font-size:13px}
+.bar{height:8px;background:#0e2236;border-radius:9px;overflow:hidden;margin-top:8px}.bar div{height:100%;background:linear-gradient(90deg,var(--cy),var(--bl));transition:width .6s}
+pre,code{font-family:var(--mono)}pre{background:#030810;border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto;font-size:13.5px;line-height:1.6}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.lvl{margin:18px 0 8px;color:var(--bl);font-weight:700}
+.days{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
+.dn{aspect-ratio:1;border-radius:14px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font:700 16px var(--mono);text-decoration:none;color:var(--mute);transform:perspective(300px) rotateX(14deg);transition:transform .2s}
+.dn:hover{transform:perspective(300px) rotateX(0) translateY(-4px)}
+.dn.done{background:rgba(0,255,200,.14);border-color:var(--cy);color:var(--cy);box-shadow:0 0 16px rgba(0,255,200,.25)}
+.dn.cur{border-color:var(--or);color:var(--or);animation:pl 1.6s infinite}
+@keyframes pl{50%{box-shadow:0 0 18px rgba(255,122,0,.6)}}
+.phase{display:flex;gap:6px;margin:10px 0}.phase span{flex:1;font-size:11px;text-align:center;padding:6px 2px;border-radius:8px;background:#0a1828;color:var(--mute)}.phase span.on{background:var(--cy);color:#00141c;font-weight:700}
+.tm{font:700 2.4rem var(--mono)}
+.q button{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#08121f}
+.q button.ok{border-color:var(--cy);background:rgba(0,255,200,.12)}.q button.no{border-color:var(--rd);background:rgba(255,59,92,.12)}
+/* memory */
+.mem{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.zone{min-height:150px}.zone h3{margin-top:0;font-size:.95rem;color:var(--mute)}
+.box{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;font:13px var(--mono);display:flex;justify-content:space-between;gap:8px;background:#08121f;transition:.3s}
+.box small{color:var(--mute)}.box.tgt{border-color:var(--pu);box-shadow:0 0 14px rgba(166,107,255,.6)}.box.ptr b{color:var(--pu)}.box.freed{border-color:var(--rd);opacity:.55;text-decoration:line-through}
+.line{display:block;padding:0 6px;border-radius:5px}.line.on{background:rgba(0,179,255,.25)}
+.note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#08121f;border-left:3px solid var(--bl)}.note.w{border-color:var(--rd);background:rgba(255,59,92,.1)}
+/* guru */
+#chat{height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.m{padding:9px 12px;border-radius:12px;max-width:88%;white-space:pre-wrap}.m.u{align-self:flex-end;background:#12385a}.m.g{background:#0e2236;border:1px solid var(--line)}
+input[type=text]{flex:1;min-width:0;background:#030810;border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--ink);font:inherit}
+.hint{color:var(--mute);font-size:13px}
+:root[data-theme=light]{--bg:#f2f8fd;--panel:#fff;--line:#c9dcec;--ink:#0a1a2a;--mute:#47627a;--cy:#007a63;--bl:#0069b3;--or:#c75a00;--pu:#7a3fd1;color-scheme:light}
+[data-theme=light] pre,[data-theme=light] input[type=text],[data-theme=light] .code,[data-theme=light] .box,[data-theme=light] .note,[data-theme=light] .q button,[data-theme=light] .m.g,[data-theme=light] .phase span,[data-theme=light] .bar{background:#eaf2f9}
+[data-theme=light] nav{background:rgba(242,248,253,.92)}[data-theme=light] .b3{color:#fff}[data-theme=light] .m.u{background:#cfe6fb}[data-theme=light] .dn.done{background:rgba(0,122,99,.12)}
+.code{width:100%;min-height:210px;background:#030810;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px;font:13.5px/1.6 var(--mono);resize:vertical;tab-size:2}
+.out{white-space:pre-wrap;min-height:70px}.out.err{border-color:var(--rd)}.out.ok{border-color:var(--cy)}
+.hero{background:radial-gradient(circle at 85% 0,rgba(0,179,255,.22),transparent 55%),var(--panel)}.hero svg{width:100%;height:auto;margin:6px 0}
+.chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mute);margin:2px 4px 0 0}
+.mod{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--ink)}.mod:hover{border-color:var(--cy)}.mod i{font:700 1.3rem var(--mono);font-style:normal;color:var(--cy);min-width:2.2ch}
+@media (max-width:560px){.mem{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<section id="enter" aria-label="Entry">
+  <div class="floor"></div>
+  <span class="sym" style="top:14%;left:8%">int</span><span class="sym" style="top:22%;left:78%">char</span>
+  <span class="sym" style="top:62%;left:10%;font-size:34px">*</span><span class="sym" style="top:70%;left:80%;font-size:34px">&amp;</span>
+  <span class="sym" style="top:42%;left:4%">malloc</span><span class="sym" style="top:48%;left:84%">free</span>
+  <span class="sym" style="top:8%;left:46%">{ }</span><span class="sym" style="top:88%;left:42%">return 0;</span>
+  <div class="scene"><div class="cube"><i>C</i><i>*</i><i>&amp;</i><i>{}</i><i>0x</i><i>;</i></div></div>
+  <h1>CForge</h1>
+  <p class="t">Learn C by watching memory move. 60 days, one hour a day.</p>
+  <button class="b3" id="enterBtn">Enter the C world</button>
+  <div id="boot" aria-live="polite"></div>
+</section>
+
+<div id="app">
+<nav id="nav"><b>CForge</b>
+  <a href="#home">Home</a><a href="#lab">Training lab</a><a href="#modules">Modules</a><a href="#roadmap">Roadmap</a><a href="#memlab">Memory lab</a><a href="#exam">Exam</a><a href="#guru">C Guru</a><button class="ghost" id="th" aria-label="Switch light or dark theme">Theme</button>
+</nav>
+<main id="view"></main>
+</div>
+
+<script>
+const T=["Setup & Hello World","Variables & types","printf & scanf","Operators","if / else","switch","Loops","Nested loops & patterns","Functions","Project: Calculator",
+"Arrays","2D arrays","Strings","String functions","Memory addresses","Pointers","Pointer arithmetic","Pointers & arrays","Pass by reference","Stack vs heap","malloc & free","Project: String library",
+"structs","Pointers to structs","unions","enums","typedef","Opening files","Reading files","Writing files","Linked list intro","Linked list operations","Stack","Queue","Sorting basics","Project: Student records",
+"Dynamic arrays","realloc","Debugging with gdb","Leaks & Valgrind","Header files","Modular code","Makefiles","Git basics","Unit testing","Macros","Error handling","Project: File manager",
+"Recursion","Binary search","Sorting algorithms","Bit manipulation","Function pointers","Processes: fork","Pipes","Signals","Sockets","HTTP server","Game loop","Project: Mini shell"];
+const LV=[["Level 1 · C foundations",1,10],["Level 2 · Memory thinking",11,22],["Level 3 · Data & structures",23,36],["Level 4 · Real C engineering",37,48],["Level 5 · Systems projects",49,60]];
+const D={
+1:{en:"Every C program starts at main(). The compiler turns your text into machine code, then you run it.",ta:"C program main()-la start aagum. Compiler unga code-a machine code-a maathi, apram run aagum.",code:'#include <stdio.h>\nint main(void){\n  printf("Hello, C!\\n");\n  return 0;\n}',q:["Where does a C program start running?",["main()","printf()","#include"],0]},
+2:{en:"A variable is a named box in memory. Its type decides how many bytes the box has: int is usually 4, char is 1.",ta:"Variable-nu sonna memory-la oru peyar vechcha box. Type-a poruththu box size maarum: int = 4 bytes, char = 1 byte.",code:'int age = 20;\nchar grade = \'A\';\nprintf("%d %c", age, grade);',q:["Which specifier prints an int?",["%d","%c","%s"],0]},
+5:{en:"if checks a condition. Zero is false; any other value is true. Use == to compare, not =.",ta:"if condition check pannum. 0 = false, mathathellam true. Compare panna == use pannunga, = illa.",code:'if (n % 2 == 0) printf("even");\nelse printf("odd");',q:["Which compares two values?",["=","==","=>"],1]},
+7:{en:"A loop repeats work. for is best when you know the count; while when you only know the stop condition.",ta:"Loop oru velaya thirumba thirumba pannum. Count theriyum-na for, condition mattum theriyum-na while.",code:'for (int i = 1; i <= 5; i++)\n  printf("%d ", i);',q:["How many times does for(i=0;i<3;i++) run?",["2","3","4"],1]},
+16:{en:"A pointer is a variable that stores an address. &x gives the address of x, *p goes to the address and reads the value.",ta:"Pointer-nu sonna address-a store pannura variable. &x = x-oda address, *p = antha address-la irukkura value.",code:'int x = 10;\nint *p = &x;\n*p = 99;   // x is now 99',q:["What does *p give you?",["The address of p","The value p points to","The size of p"],1]},
+19:{en:"C passes copies. To let a function change your variable, pass its address and use a pointer inside.",ta:"C copy-ya thaan anuppum. Function variable-a maathanum-na address anuppi pointer use pannunga.",code:'void swap(int *a, int *b){\n  int t = *a; *a = *b; *b = t;\n}\nswap(&x, &y);',q:["To modify x inside a function, pass…",["x","&x","*x"],1]},
+20:{en:"Stack holds local variables and is cleaned up automatically. Heap is memory you request with malloc and must free yourself.",ta:"Stack-la local variables, automatic-aa clean aagum. Heap-la malloc-la vaangura memory, neenga thaan free pannanum.",code:'int a = 5;                  // stack\nint *h = malloc(sizeof(int)); // heap\nfree(h);',q:["Who frees heap memory?",["The compiler","You","The CPU"],1]},
+21:{en:"malloc returns a pointer to heap bytes, or NULL on failure. Check it, use it, free it exactly once, then set it to NULL.",ta:"malloc heap memory-ku pointer tharum, fail aana NULL. Check pannunga, use pannunga, oru thadavai free pannunga, apram NULL aakkunga.",code:'int *p = malloc(5 * sizeof *p);\nif (!p) return 1;\np[0] = 7;\nfree(p);\np = NULL;',q:["What does malloc return on failure?",["0 bytes","NULL","-1"],1]}};
+const P={
+ptr:{name:"Pointer basics",code:["int x = 10;","int *p = &x;","*p = 99;"],steps:[
+ {l:0,st:[{n:"x",v:10,a:"0x1000"}],n:"x is created on the stack and holds 10."},
+ {l:1,st:[{n:"x",v:10,a:"0x1000"},{n:"p",v:"0x1000",a:"0x1004",to:"x"}],n:"p stores the address of x. It points at x."},
+ {l:2,st:[{n:"x",v:99,a:"0x1000"},{n:"p",v:"0x1000",a:"0x1004",to:"x"}],n:"*p = 99 follows the arrow and changes x itself."}]},
+heap:{name:"malloc and free",code:["int *p = malloc(sizeof(int));","*p = 42;","free(p);","p = NULL;"],steps:[
+ {l:0,st:[{n:"p",v:"0x2000",a:"0x1000",to:"h"}],h:[{id:"h",a:"0x2000",v:"?"}],n:"malloc reserves 4 bytes on the heap. p holds its address."},
+ {l:1,st:[{n:"p",v:"0x2000",a:"0x1000",to:"h"}],h:[{id:"h",a:"0x2000",v:42}],n:"42 is written into the heap block."},
+ {l:2,st:[{n:"p",v:"0x2000",a:"0x1000",to:"h"}],h:[{id:"h",a:"0x2000",v:"freed",f:1}],n:"free releases the block. p still holds the old address: it is dangling.",w:1},
+ {l:3,st:[{n:"p",v:"NULL",a:"0x1000"}],h:[{id:"h",a:"0x2000",v:"freed",f:1}],n:"Setting p to NULL makes accidental use easy to catch."}]},
+uaf:{name:"Bug: use after free",code:["int *p = malloc(sizeof(int));","free(p);","*p = 5;   // BUG"],steps:[
+ {l:0,st:[{n:"p",v:"0x2000",a:"0x1000",to:"h"}],h:[{id:"h",a:"0x2000",v:"?"}],n:"Heap block allocated."},
+ {l:1,st:[{n:"p",v:"0x2000",a:"0x1000",to:"h"}],h:[{id:"h",a:"0x2000",v:"freed",f:1}],n:"Block freed. p is now dangling."},
+ {l:2,st:[{n:"p",v:"0x2000",a:"0x1000",to:"h"}],h:[{id:"h",a:"0x2000",v:"freed",f:1}],n:"Writing through p touches memory you no longer own. Crash or silent corruption. Fix: do not use p after free, or set p = NULL.",w:1}]},
+leak:{name:"Bug: memory leak",code:["int *p = malloc(4);","p = malloc(8);   // lost first block"],steps:[
+ {l:0,st:[{n:"p",v:"0x2000",a:"0x1000",to:"a"}],h:[{id:"a",a:"0x2000",v:"?"}],n:"First block allocated."},
+ {l:1,st:[{n:"p",v:"0x3000",a:"0x1000",to:"b"}],h:[{id:"a",a:"0x2000",v:"leaked",f:1},{id:"b",a:"0x3000",v:"?"}],n:"p now points to the new block. Nothing points to the first one, so it can never be freed. Fix: free(p) before reassigning.",w:1}]}};
+const G=[
+[/segfault|segmentation|crash/,"A segfault means you touched memory you don’t own. Check: NULL pointers, array index past the end, use after free, a missing & in scanf.","Segfault-nu sonna unga-ku sondham illaatha memory-a touch pannuteenga. NULL pointer, array index over, free-kku apram use, scanf-la & marandhathu — ivatha check pannunga."],
+[/leak/,"A leak is heap memory you malloc’d and never freed. Every malloc needs exactly one free. Run Valgrind to find them.","Leak-nu sonna malloc pannitu free pannala. Ovvoru malloc-kum oru free venum. Valgrind-la check pannalam."],
+[/dangl|after free/,"A dangling pointer still holds an address that was freed. After free(p), set p = NULL.","Dangling pointer free aana address-a innum vechirukkum. free(p) apram p = NULL pannunga."],
+[/malloc|heap/,"malloc(n) reserves n bytes on the heap and returns a pointer or NULL. Always check for NULL, and free when done.","malloc(n) heap-la n bytes tharum. NULL check pannunga, mudinjathum free pannunga."],
+[/stack/,"The stack stores local variables and function calls, and is freed automatically when a function returns.","Stack-la local variables irukkum, function return aana udane automatic-aa pogum."],
+[/pointer|\*|&/,"A pointer stores an address. &x is x’s address; *p reads or writes the value at that address. Open the Memory lab and step through “Pointer basics”.","Pointer address-a store pannum. &x = address, *p = antha address-la value. Memory lab-la Pointer basics step pannunga."],
+[/array/,"An array is consecutive boxes in memory. a[i] is the same as *(a+i). C never checks bounds, so stay within 0 to n-1.","Array continuous memory boxes. a[i] = *(a+i). C bounds check pannathu, 0 to n-1 mattum use pannunga."],
+[/scanf/,"scanf needs addresses: scanf(\"%d\", &n). Forgetting & is the top beginner crash.","scanf-ku address venum: scanf(\"%d\", &n). & marandha crash aagum."]];
+const S0={done:{},xp:0,streak:0,last:"",lang:"en"};
+let S;try{S=Object.assign({},S0,JSON.parse(localStorage.getItem("cforge")||"{}"))}catch(e){S=Object.assign({},S0)}
+const save=()=>{try{localStorage.setItem("cforge",JSON.stringify(S))}catch(e){}try{window.cloudSave&&window.cloudSave()}catch(e){}};
+const $=s=>document.querySelector(s),V=$("#view");
+const doneN=()=>Object.keys(S.done).length,nextDay=()=>{for(let i=1;i<=60;i++)if(!S.done[i])return i;return 60};
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const lt=(e,t)=>S.lang==="ta"?t:e;
+/* entry */
+$("#enterBtn").onclick=()=>{
+  const b=$("#boot"),m=["Initializing memory…","Loading pointers…","Compiling your future…"];let i=0;
+  $("#enterBtn").disabled=true;
+  const t=setInterval(()=>{b.textContent=m[i++]||"";if(i>m.length){clearInterval(t);$("#enter").classList.add("go");$("#app").style.display="block";setTimeout(()=>{$("#enter").style.display="none"},900);route()}},500);
+};
+/* timer */
+let tm={left:3600,run:false,id:null};
+const PH=["Animation","Notes","Trace","Challenge","Quiz"];
+function tick(){tm.left--;if(tm.left<=0){tm.left=0;pause()}drawTm()}
+function pause(){clearInterval(tm.id);tm.run=false;const b=$("#tbtn");if(b)b.textContent="Start"}
+function drawTm(){const e=$("#tm");if(!e)return;const m=Math.floor(tm.left/60),s=tm.left%60;e.textContent=m+":"+String(s).padStart(2,"0");
+  const ph=Math.min(4,Math.floor((3600-tm.left)/720));document.querySelectorAll(".phase span").forEach((x,i)=>x.classList.toggle("on",i===ph))}
+/* routes */
+function route(){
+  const h=(location.hash||"#home").slice(1);
+  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+(h.startsWith("day")?"roadmap":h)));
+  if(h.startsWith("day-")){pause();return lesson(+h.slice(4)||1)}
+  ({home,roadmap,memlab,guru,lab,modules,exam}[h]||home)();window.scrollTo(0,0)}
+addEventListener("hashchange",route);
+function home(){const n=doneN(),nd=nextDay();
+  V.innerHTML=`<div class="card hero"><h2>Write your first C program in 10 minutes</h2><p>No install. Run Hello, change it, fix a bug, earn your first badge.</p><svg viewBox="0 0 600 90" role="img" aria-label="Source code goes through the compiler to the CPU and becomes output"><g font-family="monospace" font-size="13" text-anchor="middle"><g style="fill:var(--panel);stroke:var(--cy)" stroke-width="1.5"><rect x="6" y="24" width="108" height="44" rx="10"/><rect x="166" y="24" width="108" height="44" rx="10"/><rect x="326" y="24" width="108" height="44" rx="10"/><rect x="486" y="24" width="108" height="44" rx="10"/></g><g style="fill:var(--ink)"><text x="60" y="51">main.c</text><text x="220" y="51">compiler</text><text x="380" y="51">CPU</text><text x="540" y="51">output</text></g></g><g style="stroke:var(--bl)" stroke-width="2"><path d="M116 46h48M276 46h48M436 46h48"/></g><circle cy="46" r="6" style="fill:var(--or)"><animate attributeName="cx" values="60;540" dur="4s" repeatCount="indefinite"/></circle></svg><div class="row"><a href="#lab"><button class="b3">Start the 10-minute lab</button></a><a href="#modules"><button class="ghost">See all 12 modules</button></a></div></div>
+  <h2 style="margin-top:20px">Dashboard</h2>
+  <div class="grid"><div class="card stat"><b>${nd}</b><span>Today’s lesson</span></div><div class="card stat"><b>${S.streak}</b><span>Day streak</span></div><div class="card stat"><b>${S.xp}</b><span>XP</span></div><div class="card stat"><b>${n}/60</b><span>Days done</span></div></div>
+  <div class="card" style="margin-top:12px"><b>${esc(T[nd-1])}</b><div class="bar"><div style="width:${n/60*100}%"></div></div>
+  <div class="row"><a href="#day-${nd}"><button class="b3">Continue lesson</button></a><a href="#memlab"><button class="b3 pu">Memory lab</button></a><a href="#guru"><button class="b3 or">Ask C Guru</button></a></div></div>
+  <p class="hint" style="margin-top:12px">C is not difficult. Nobody showed you memory.</p>`}
+function roadmap(){let h="<h2>60-day roadmap</h2>";const nd=nextDay();
+  LV.forEach(([n,a,b])=>{h+=`<div class="lvl">${n}</div><div class="days">`;for(let d=a;d<=b;d++)h+=`<a class="dn ${S.done[d]?"done":d===nd?"cur":""}" href="#day-${d}" title="${esc(T[d-1])}">${d}</a>`;h+="</div>"});
+  V.innerHTML=h}
+function lesson(d){const L=D[d],x=L||{en:"Full notes for this day are not written yet. Read about “"+T[d-1]+"”, type the examples yourself, and ask C Guru when stuck.",ta:"Indha naal notes innum ezhuthala. “"+T[d-1]+"” padichchu, examples neenga type pannunga, sikkina C Guru-kitta kelunga.",code:"// Write your own example for: "+T[d-1]};
+  V.innerHTML=`<h2>Day ${d}: ${esc(T[d-1])}</h2>
+  <div class="row"><button class="ghost ${S.lang==="en"?"on":""}" data-l="en">English</button><button class="ghost ${S.lang==="ta"?"on":""}" data-l="ta">Tanglish</button></div>
+  <div class="card"><div class="tm" id="tm">60:00</div><div class="phase">${PH.map(p=>`<span>${p}</span>`).join("")}</div>
+  <button class="b3" id="tbtn">Start</button> <button class="ghost" id="treset">Reset</button></div>
+  <h3>Concept</h3><p>${lt(x.en,x.ta)}</p><h3>Code</h3><pre>${esc(x.code)}</pre>
+  <h3>Quiz</h3><div class="card q" id="quiz"></div>
+  <div class="row"><button class="b3 or" id="fin">${S.done[d]?"Completed":"Mark day complete"}</button><a href="#memlab"><button class="ghost">Open memory lab</button></a></div><p class="hint" id="msg"></p>`;
+  V.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{S.lang=b.dataset.l;save();lesson(d)});
+  const q=$("#quiz");
+  if(x.q){q.innerHTML=`<b>${esc(x.q[0])}</b>`+x.q[1].map((o,i)=>`<button data-i="${i}">${esc(o)}</button>`).join("");
+    q.querySelectorAll("button").forEach(b=>b.onclick=()=>{const ok=+b.dataset.i===x.q[2];b.classList.add(ok?"ok":"no");if(ok)q.querySelectorAll("button").forEach(z=>z.disabled=true)})}
+  else q.textContent="Quiz for this day is coming soon. Write one question yourself and answer it in the Guru chat.";
+  $("#tbtn").onclick=()=>{if(tm.run){pause()}else{tm.run=true;$("#tbtn").textContent="Pause";tm.id=setInterval(tick,1000)}};
+  $("#treset").onclick=()=>{pause();tm.left=3600;drawTm()};drawTm();
+  $("#fin").onclick=()=>{if(S.done[d])return;S.done[d]=1;S.xp+=50;const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();
+    S.streak=S.last===t?S.streak:S.last===y?S.streak+1:1;S.last=t;save();$("#fin").textContent="Completed";$("#msg").textContent="+50 XP. Streak: "+S.streak+" days."}}
+function memlab(){let k="ptr",i=0;
+  const draw=()=>{const p=P[k],s=p.steps[i],tg=s.st.filter(z=>z.to).map(z=>z.to);
+    V.innerHTML=`<h2>Memory lab</h2><div class="row">${Object.keys(P).map(a=>`<button class="ghost ${a===k?"on":""}" data-k="${a}">${P[a].name}</button>`).join("")}</div>
+    <pre>${p.code.map((c,j)=>`<span class="line ${j===s.l?"on":""}">${esc(c)}</span>`).join("")}</pre>
+    <div class="mem" style="margin-top:12px"><div class="card zone"><h3>Stack</h3>${s.st.map(z=>`<div class="box ${z.to?"ptr":""} ${tg.includes(z.n)?"tgt":""}"><span><b>${z.n}</b> = ${z.v}</span><small>${z.a}</small></div>`).join("")}</div>
+    <div class="card zone"><h3>Heap</h3>${(s.h||[]).map(z=>`<div class="box ${tg.includes(z.id)&&!z.f?"tgt":""} ${z.f?"freed":""}"><span>${z.v}</span><small>${z.a}</small></div>`).join("")||'<span class="hint">empty</span>'}</div></div>
+    <div class="note ${s.w?"w":""}">${s.n}</div>
+    <div class="row"><button class="ghost" id="pv" ${i?"":"disabled"}>Back</button><button class="b3" id="nx" ${i<p.steps.length-1?"":"disabled"}>Next step</button><span class="hint">Step ${i+1} of ${p.steps.length}</span></div>`;
+    V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{k=b.dataset.k;i=0;draw()});$("#pv").onclick=()=>{i--;draw()};$("#nx").onclick=()=>{i++;draw()}};
+  draw()}
+function guru(){V.innerHTML=`<h2>C Guru</h2><div class="row"><button class="ghost ${S.lang==="en"?"on":""}" data-l="en">English</button><button class="ghost ${S.lang==="ta"?"on":""}" data-l="ta">Tanglish</button></div>
+  <div class="card"><div id="chat"><div class="m g">Ask about pointers, malloc, segfaults, leaks, arrays or scanf.</div></div>
+  <div class="row"><input type="text" id="qi" placeholder="Why does my program segfault?" aria-label="Question"><button class="b3" id="go">Ask</button></div>
+  <p class="hint">Built-in keyword tutor. It works offline and gives guidance, not guaranteed answers.</p></div>`;
+  V.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{S.lang=b.dataset.l;save();guru()});
+  const send=()=>{const q=$("#qi").value.trim();if(!q)return;const c=$("#chat");c.insertAdjacentHTML("beforeend",`<div class="m u">${esc(q)}</div>`);
+    const r=G.find(g=>g[0].test(q.toLowerCase()));const a=r?lt(r[1],r[2]):lt("I don’t know that one yet. Try the Memory lab, or ask about pointers, malloc, segfaults or arrays.","Idhu enakku innum theriyala. Memory lab paarunga, illa pointer, malloc, segfault pathi kelunga.");
+    c.insertAdjacentHTML("beforeend",`<div class="m g">${esc(a)}</div>`);$("#qi").value="";c.scrollTop=c.scrollHeight};
+  $("#go").onclick=send;$("#qi").onkeydown=e=>{if(e.key==="Enter")send()}}
+/* theme */
+const ap=t=>{document.documentElement.dataset.theme=t};
+ap(S.theme||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"));
+$("#th").onclick=()=>{S.theme=document.documentElement.dataset.theme==="light"?"dark":"light";ap(S.theme);save()};
+/* extra memory programs */
+const mk=(i,s,l,n)=>({l,st:[{n:"i",v:i,a:"0x1004"},{n:"sum",v:s,a:"0x1000"}],n});
+P.loop={name:"for loop",code:["int sum = 0;","for (int i = 1; i <= 3; i++)","  sum += i;"],steps:[{l:0,st:[{n:"sum",v:0,a:"0x1000"}],n:"sum starts at 0."},mk(1,0,1,"i starts at 1. The condition i <= 3 is true."),mk(1,1,2,"sum += i adds 1."),mk(2,1,1,"i++ makes i 2. Still true."),mk(2,3,2,"sum is now 3."),mk(3,3,1,"i is 3. Still true."),mk(3,6,2,"sum is now 6."),mk(4,6,1,"i is 4. The condition is false, so the loop ends. sum = 6.")]};
+const ar=(a,p)=>{const r=a.map((v,j)=>({n:"a["+j+"]",v,a:"0x"+(1000+j*4)}));if(p)r.push({n:"p",v:"0x1000",a:"0x1010",to:"a[0]"});return r};
+P.arr={name:"Array and pointer",code:["int a[3] = {5, 8, 2};","a[1] = 9;","int *p = a;"],steps:[{l:0,st:ar([5,8,2]),n:"An array is boxes side by side. Indexes start at 0. Each int is 4 bytes, so addresses go up by 4."},{l:1,st:ar([5,9,2]),n:"a[1] is the second box. It now holds 9."},{l:2,st:ar([5,9,2],1),n:"An array name is the address of its first box. p points at a[0]."}]};
+/* training lab */
+const EX=[
+{t:"Hello, C!",d:"Print exactly: Hello, C!",code:"#include <stdio.h>\n\nint main() {\n  // print Hello, C! here\n\n  return 0;\n}",inp:"",exp:"Hello, C!",h:["printf shows text on screen.","Put the text inside double quotes, then end the line with ;","printf(\"Hello, C!\\n\");"]},
+{t:"Add two numbers",d:"Read two integers and print Sum = followed by the total.",code:"#include <stdio.h>\n\nint main() {\n  int a, b, sum;\n  // read a and b, then print the sum\n\n  return 0;\n}",inp:"10 20",exp:"Sum = 30",h:["scanf reads numbers into variables.","scanf(\"%d %d\", &a, &b); then sum = a + b;","printf(\"Sum = %d\", sum);"]},
+{t:"Fix the code",d:"This program has 2 mistakes. Fix them so it prints Age = 20.",code:"#include <stdio.h>\n\nint main() {\n  int age\n  scanf(\"%d\", age);\n  printf(\"Age = %d\", age);\n  return 0;\n}",inp:"20",exp:"Age = 20",h:["Read the error message: it names a line.","Every statement ends with ;","scanf needs the address: &age"]}];
+function chk(code){const er=[];if(!/#include\s*<stdio\.h>/.test(code))er.push("Add #include <stdio.h> at the top.");if(!/main\s*\(/.test(code))er.push("Your program needs a main() function.");
+ code.split("\n").forEach((l,i)=>{const t=l.trim(),n="Line "+(i+1)+": ";if(/^(int|float|double|char)\s+[^;{()]+$/.test(t)||/^(printf|scanf|return)\b.*[^;{]$/.test(t))er.push(n+"missing ; at the end.");
+  const m=t.match(/scanf\s*\(\s*"[^"]*"\s*,(.*)\)/);if(m&&m[1].split(",").some(a=>!/^\s*&/.test(a)))er.push(n+"scanf needs & before the variable, like &age.")});return er}
+function exec(code,inp){const env={},nums=inp.split(/\s+/).filter(Boolean).map(Number);let ni=0,out="";
+ const c=code.replace(/\/\/.*$/gm,"").replace(/\/\*[\s\S]*?\*\//g,"");
+ const ev=e=>{const s=e.replace(/[a-zA-Z_]\w*/g,v=>v in env?env[v]:"NaN");if(!/^[\d\s+\-*/%().NaN]+$/.test(s))throw 0;return Function("return "+s)()};
+ const re=/scanf\s*\(\s*"[^"]*"\s*,([^;]*)\)\s*;|printf\s*\(\s*"((?:[^"\\]|\\.)*)"\s*(?:,([^;]*))?\)\s*;|\b(?:int|float|double)?\s*([a-zA-Z_]\w*)\s*=\s*([^;=]+);/g;let m;
+ while((m=re.exec(c))){if(m[1]!==undefined)m[1].split(",").forEach(a=>{env[a.replace(/[&\s]/g,"")]=nums[ni++]});
+  else if(m[2]!==undefined){const ar=m[3]?m[3].split(",").map(a=>ev(a.trim())):[];let k=0;out+=m[2].replace(/%[di]|%f/g,s=>{const v=ar[k++];return s==="%f"?(+v).toFixed(6):String(Math.trunc(v))}).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\"/g,'"')}
+  else env[m[4]]=ev(m[5])}return out}
+function lab(){S.lab=S.lab||{};let k=0,hi=0;const codes=EX.map(e=>e.code);
+ const draw=()=>{const e=EX[k];V.innerHTML=`<h2>Training lab</h2><div class="row">${EX.map((x,i)=>`<button class="ghost ${i===k?"on":""}" data-k="${i}">${S.lab[i]?"✓ ":""}${i+1}. ${x.t}</button>`).join("")}</div>
+ <div class="card"><b>${e.t}</b><p>${e.d}</p><textarea class="code" id="cd" spellcheck="false" aria-label="C code">${esc(codes[k])}</textarea>
+ <div class="row"><label class="hint" for="in">Input</label><input type="text" id="in" value="${e.inp}"></div>
+ <div class="row"><button class="b3" id="run">Run</button><button class="ghost" id="hint">Hint</button><button class="ghost" id="rs">Reset</button></div>
+ <pre class="out" id="out">Output appears here.</pre><p class="hint" id="hm"></p></div>
+ <p class="hint">Browser check mode: handles variables, scanf, printf and + - * / %. Loops and if need a real compiler (Judge0).</p>`;
+  V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{codes[k]=$("#cd").value;k=+b.dataset.k;hi=0;draw()});
+  $("#rs").onclick=()=>{codes[k]=e.code;draw()};
+  $("#hint").onclick=()=>{$("#hm").textContent="Hint "+(hi+1)+": "+e.h[Math.min(hi++,2)]};
+  $("#run").onclick=()=>{const code=$("#cd").value,o=$("#out");codes[k]=code;const er=chk(code);
+   if(er.length){o.className="out err";o.textContent="Compile error\n"+er.join("\n");return}
+   let out;try{out=exec(code,$("#in").value)}catch(x){o.className="out err";o.textContent="This line can’t run in browser mode yet.";return}
+   const ok=out.trim()===e.exp;o.className="out "+(ok?"ok":"err");o.textContent=(out||"(no output)")+"\n\n"+(ok?"Correct!":"Expected: "+e.exp);
+   if(ok&&!S.lab[k]){S.lab[k]=1;S.xp+=30;save();$("#hm").textContent="+30 XP"+(k===0?" · Badge unlocked: First C Program":"")}}};
+ draw()}
+/* modules */
+const MD=[["Introduction to C",1],["Variables & data types",2],["Operators",4],["Input & output",3],["If, else & switch",5],["Loops",7],["Arrays",11],["Strings",13],["Functions",9],["Pointers",16],["Structures & unions",23],["File handling",28],["Mini projects",10]];
+function modules(){V.innerHTML="<h2>12 modules + projects</h2>"+MD.map((m,i)=>`<a class="card mod" href="#day-${m[1]}" style="margin-bottom:10px"><i>${i+1}</i><span><b>${m[0]}</b><br><span class="chip">Beginner: meaning</span><span class="chip">Intermediate: examples</span><span class="chip">Advanced: problems</span></span></a>`).join("")}
+/* exam */
+const Q=[["MCQ","Which symbol gives the address of a variable?",["*","&","#"],1,"& is the address-of operator."],
+["Find the output","int x = 5; printf(\"%d\", x*2+1);",["10","11","15"],1,"x*2 is 10, plus 1 is 11."],
+["Find the error","scanf(\"%d\", n);",["Missing &","Missing ;","Wrong %d"],0,"scanf needs the address: &n."],
+["Find the output","for (i = 1; i <= 3; i++) printf(\"%d\", i);",["123","12","0123"],0,"i runs 1, 2, 3."],
+["MCQ","Which header declares printf?",["stdlib.h","stdio.h","string.h"],1,"printf and scanf live in stdio.h."]];
+function exam(){let sc=0,dn=0;V.innerHTML="<h2>Exam mode</h2><p class=\"hint\" id=\"sc\">Score: 0 / "+Q.length+"</p>"+Q.map((q,i)=>`<div class="card q" style="margin-bottom:10px"><span class="chip">${q[0]}</span><pre>${esc(q[1])}</pre>${q[2].map((o,j)=>`<button data-q="${i}" data-j="${j}">${esc(o)}</button>`).join("")}<p class="hint" id="e${i}"></p></div>`).join("")+
+ `<div class="card"><span class="chip">4-mark</span><p><b>What is a pointer? Explain with an example.</b></p><button class="ghost" id="ma">Show model answer</button><p id="mt" class="hint"></p></div>`;
+ V.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{const i=+b.dataset.q,q=Q[i],ok=+b.dataset.j===q[3];if(b.parentNode.dataset.d)return;b.parentNode.dataset.d=1;b.classList.add(ok?"ok":"no");if(ok)sc++;
+  $("#e"+i).textContent=(ok?"Correct. ":"Not quite. ")+q[4];$("#sc").textContent="Score: "+sc+" / "+Q.length;if(ok){S.xp+=10;save()}});
+ $("#ma").onclick=()=>{$("#mt").textContent="1 mark: a pointer is a variable that stores an address. 1 mark: declared with *, e.g. int *p. 1 mark: p = &x stores the address of x. 1 mark: *p reads or changes the value of x."}}
+</script>
+<script type="module">
+const V0="10.12.2",B="https://www.gstatic.com/firebasejs/"+V0+"/";
+const {initializeApp}=await import(B+"firebase-app.js");
+const {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}=await import(B+"firebase-auth.js");
+const {getDatabase,ref,get,set}=await import(B+"firebase-database.js");
+const app=initializeApp({apiKey:"AIzaSyCiejOPNqtM5_yo4b70oSIwq83y-ZsdMSU",authDomain:"c-progarmin.firebaseapp.com",projectId:"c-progarmin",storageBucket:"c-progarmin.firebasestorage.app",messagingSenderId:"226410285609",appId:"1:226410285609:web:b6258a68d1eea824136a38"});
+const auth=getAuth(app),db=getDatabase(app);
+const btn=document.createElement("button");btn.className="ghost";btn.textContent="Sign in";document.getElementById("nav").appendChild(btn);
+let user=null,t;
+btn.onclick=()=>user?signOut(auth):signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert("Sign-in failed: "+e.code));
+window.cloudSave=()=>{if(!user)return;clearTimeout(t);t=setTimeout(()=>set(ref(db,"users/"+user.uid),{done:S.done,xp:S.xp,streak:S.streak,last:S.last,lab:S.lab||{},lang:S.lang,name:user.displayName||"",updated:Date.now()}).catch(console.error),800)};
+onAuthStateChanged(auth,async u=>{user=u;btn.textContent=u?"Sign out ("+(u.displayName||"you").split(" ")[0]+")":"Sign in";if(!u)return;
+ try{const s=await get(ref(db,"users/"+u.uid));if(s.exists()){const c=s.val();S.done=Object.assign({},c.done,S.done);S.lab=Object.assign({},c.lab,S.lab);S.xp=Math.max(S.xp,c.xp||0);if((c.streak||0)>S.streak){S.streak=c.streak;S.last=c.last}}save();route()}catch(e){console.error(e)}});
+</script>
+</body>
+</html>

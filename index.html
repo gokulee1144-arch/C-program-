@@ -260,11 +260,11 @@ function lab(){S.lab=S.lab||{};let k=0,hi=0;const codes=EX.map(e=>e.code);
   V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{codes[k]=$("#cd").value;k=+b.dataset.k;hi=0;draw()});
   $("#rs").onclick=()=>{codes[k]=e.code;draw()};
   $("#hint").onclick=()=>{$("#hm").textContent="Hint "+(hi+1)+": "+e.h[Math.min(hi++,2)]};
-  $("#run").onclick=()=>{const code=$("#cd").value,o=$("#out");codes[k]=code;const er=chk(code);
+  $("#run").onclick=()=>{const code=$("#cd").value,o=$("#out");codes[k]=code;$("#hm").textContent="";const er=chk(code);
    if(er.length){o.className="out err";o.textContent="Compile error\n"+er.join("\n");return}
    let out;try{out=exec(code,$("#in").value)}catch(x){o.className="out err";o.textContent="This line can’t run in browser mode yet.";return}
-   const ok=out.trim()===e.exp;o.className="out "+(ok?"ok":"err");o.textContent=(out||"(no output)")+"\n\n"+(ok?"Correct!":"Expected: "+e.exp);
-   if(ok&&!S.lab[k]){S.lab[k]=1;S.xp+=30;save();$("#hm").textContent="+30 XP"+(k===0?" · Badge unlocked: First C Program":"")}}};
+   const ok=out.trim()===e.exp;o.className="out "+(ok?"ok":"err");o.textContent=out||"(no output)";$("#hm").textContent=ok?"Correct!":"Not matching yet. Check your code and try again.";
+   if(ok&&!S.lab[k]){S.lab[k]=1;S.xp+=30;save();$("#hm").textContent="Correct! +30 XP"+(k===0?" · Badge unlocked: First C Program":"")}}};
  draw()}
 /* modules */
 const MD=[["Introduction to C",1],["Variables & data types",2],["Operators",4],["Input & output",3],["If, else & switch",5],["Loops",7],["Arrays",11],["Strings",13],["Functions",9],["Pointers",16],["Structures & unions",23],["File handling",28],["Mini projects",10]];
@@ -286,7 +286,7 @@ const V0="10.12.2",B="https://www.gstatic.com/firebasejs/"+V0+"/";
 const {initializeApp}=await import(B+"firebase-app.js");
 const {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}=await import(B+"firebase-auth.js");
 const {getDatabase,ref,get,set}=await import(B+"firebase-database.js");
-const app=initializeApp({apiKey:"AIzaSyCiejOPNqtM5_yo4b70oSIwq83y-ZsdMSU",authDomain:"c-progarmin.firebaseapp.com",projectId:"c-progarmin",storageBucket:"c-progarmin.firebasestorage.app",messagingSenderId:"226410285609",appId:"1:226410285609:web:b6258a68d1eea824136a38"});
+const app=initializeApp({apiKey:"AIzaSyCiejOPNqtM5_yo4b70oSIwq83y-ZsdMSU",authDomain:"c-progarmin.firebaseapp.com",databaseURL:"https://c-progarmin-default-rtdb.firebaseio.com",projectId:"c-progarmin",storageBucket:"c-progarmin.firebasestorage.app",messagingSenderId:"226410285609",appId:"1:226410285609:web:b6258a68d1eea824136a38"});
 const auth=getAuth(app),db=getDatabase(app);
 const btn=document.createElement("button");btn.className="ghost";btn.textContent="Sign in";document.getElementById("nav").appendChild(btn);
 let user=null,t;

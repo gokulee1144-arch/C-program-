@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CForge – Master C by seeing memory</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#050b14;--panel:#0b1626;--line:#173049;--ink:#e6f4ff;--mute:#8fb0c7;--cy:#00ffc8;--bl:#00b3ff;--or:#ff7a00;--rd:#ff3b5c;--pu:#a66bff;
+:root{--bg:#0a0908;--panel:#141110;--line:#2a2420;--ink:#f4ede6;--mute:#a39889;--cy:#ff7a1a;--bl:#ffb347;--or:#ff7a00;--rd:#ff3b5c;--pu:#ff9d5c;
 --ui:"Space Grotesk",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,Consolas,monospace;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -14,32 +14,32 @@ body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--ui);min-height:1
 button{font:inherit;cursor:pointer;color:inherit}
 :focus-visible{outline:2px solid var(--cy);outline-offset:3px}
 /* 3D buttons */
-.b3{border:0;padding:12px 22px;border-radius:12px;font-weight:700;color:#00141c;background:linear-gradient(135deg,var(--cy),var(--bl));box-shadow:0 6px 0 #00806a,0 12px 24px rgba(0,255,200,.25);transition:transform .15s,box-shadow .15s}
-.b3:hover{transform:translateY(-3px);box-shadow:0 9px 0 #00806a,0 18px 32px rgba(0,255,200,.4)}
-.b3:active{transform:translateY(5px);box-shadow:0 1px 0 #00806a}
+.b3{border:0;padding:12px 22px;border-radius:12px;font-weight:700;color:#00141c;background:linear-gradient(135deg,var(--cy),var(--bl));box-shadow:0 6px 0 #a34400,0 12px 24px rgba(255,122,26,.25);transition:transform .15s,box-shadow .15s}
+.b3:hover{transform:translateY(-3px);box-shadow:0 9px 0 #a34400,0 18px 32px rgba(255,122,26,.4)}
+.b3:active{transform:translateY(5px);box-shadow:0 1px 0 #a34400}
 .b3.or{background:linear-gradient(135deg,#ffb347,var(--or));box-shadow:0 6px 0 #a34d00,0 12px 24px rgba(255,122,0,.25)}
 .b3.or:hover{box-shadow:0 9px 0 #a34d00,0 18px 32px rgba(255,122,0,.4)}
 .b3.or:active{box-shadow:0 1px 0 #a34d00}
-.b3.pu{background:linear-gradient(135deg,#c9a4ff,var(--pu));box-shadow:0 6px 0 #5a2fa6}
+.b3.pu{background:linear-gradient(135deg,#ffc896,var(--pu));box-shadow:0 6px 0 #a34400}
 .ghost{background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 14px;color:var(--mute)}
 .ghost:hover,.ghost.on{border-color:var(--cy);color:var(--cy)}
 /* entry */
-#enter{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 40%,#08233a,#02060c 70%);overflow:hidden;transition:transform .9s cubic-bezier(.7,0,.3,1),opacity .9s}
+#enter{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 40%,#2b1306,#050403 70%);overflow:hidden;transition:transform .9s cubic-bezier(.7,0,.3,1),opacity .9s}
 #enter.go{transform:scale(3);opacity:0;pointer-events:none}
-.floor{position:absolute;left:-50%;right:-50%;bottom:-10%;height:60%;background-image:linear-gradient(rgba(0,255,200,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,200,.18) 1px,transparent 1px);background-size:56px 56px;transform:perspective(420px) rotateX(68deg);animation:fl 5s linear infinite;mask-image:linear-gradient(transparent,#000 60%)}
+.floor{position:absolute;left:-50%;right:-50%;bottom:-10%;height:60%;background-image:linear-gradient(rgba(255,122,26,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,122,26,.18) 1px,transparent 1px);background-size:56px 56px;transform:perspective(420px) rotateX(68deg);animation:fl 5s linear infinite;mask-image:linear-gradient(transparent,#000 60%)}
 @keyframes fl{to{background-position:0 56px}}
 .sym{position:absolute;font-family:var(--mono);color:var(--cy);opacity:.4;text-shadow:0 0 14px var(--cy);animation:fy 7s ease-in-out infinite}
 @keyframes fy{50%{transform:translateY(-26px) rotate(7deg)}}
 .scene{perspective:700px;width:120px;height:120px;margin:0 auto 20px;position:relative;z-index:2}
 .cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:rot 9s linear infinite}
 @keyframes rot{to{transform:rotateX(360deg) rotateY(360deg)}}
-.cube i{position:absolute;inset:0;display:grid;place-items:center;font:700 54px var(--mono);font-style:normal;color:var(--cy);border:2px solid var(--cy);background:rgba(0,255,200,.07);box-shadow:inset 0 0 24px rgba(0,255,200,.3),0 0 20px rgba(0,255,200,.2)}
+.cube i{position:absolute;inset:0;display:grid;place-items:center;font:700 54px var(--mono);font-style:normal;color:var(--cy);border:2px solid var(--cy);background:rgba(255,122,26,.07);box-shadow:inset 0 0 24px rgba(255,122,26,.3),0 0 20px rgba(255,122,26,.2)}
 .cube i:nth-child(1){transform:translateZ(60px)}.cube i:nth-child(2){transform:rotateY(180deg) translateZ(60px)}
 .cube i:nth-child(3){transform:rotateY(90deg) translateZ(60px)}.cube i:nth-child(4){transform:rotateY(-90deg) translateZ(60px)}
 .cube i:nth-child(5){transform:rotateX(90deg) translateZ(60px)}.cube i:nth-child(6){transform:rotateX(-90deg) translateZ(60px)}
 #enter h1{font-size:clamp(2.4rem,8vw,4.5rem);letter-spacing:.04em;position:relative;z-index:2}
 #enter p.t{color:var(--mute);max-width:34ch;margin:8px auto 24px;position:relative;z-index:2}
-#boot{font:13px var(--mono);color:#7ef9dd;min-height:20px;margin-top:20px;position:relative;z-index:2}
+#boot{font:13px var(--mono);color:#ffb98a;min-height:20px;margin-top:20px;position:relative;z-index:2}
 /* app */
 #app{display:none}
 nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;gap:6px;align-items:center;overflow-x:auto;padding:10px 14px;background:rgba(5,11,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
@@ -51,57 +51,57 @@ h2{font-size:1.6rem;margin-bottom:12px}h3{font-size:1.1rem;margin:16px 0 6px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 .stat b{display:block;font:700 2rem var(--mono);color:var(--cy)}.stat span{color:var(--mute);font-size:13px}
-.bar{height:8px;background:#0e2236;border-radius:9px;overflow:hidden;margin-top:8px}.bar div{height:100%;background:linear-gradient(90deg,var(--cy),var(--bl));transition:width .6s}
-pre,code{font-family:var(--mono)}pre{background:#030810;border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto;font-size:13.5px;line-height:1.6}
+.bar{height:8px;background:#1f1a16;border-radius:9px;overflow:hidden;margin-top:8px}.bar div{height:100%;background:linear-gradient(90deg,var(--cy),var(--bl));transition:width .6s}
+pre,code{font-family:var(--mono)}pre{background:#0d0b0a;border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto;font-size:13.5px;line-height:1.6}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
 .lvl{margin:18px 0 8px;color:var(--bl);font-weight:700}
 .days{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
 .dn{aspect-ratio:1;border-radius:14px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font:700 16px var(--mono);text-decoration:none;color:var(--mute);transform:perspective(300px) rotateX(14deg);transition:transform .2s}
 .dn:hover{transform:perspective(300px) rotateX(0) translateY(-4px)}
-.dn.done{background:rgba(0,255,200,.14);border-color:var(--cy);color:var(--cy);box-shadow:0 0 16px rgba(0,255,200,.25)}
+.dn.done{background:rgba(255,122,26,.14);border-color:var(--cy);color:var(--cy);box-shadow:0 0 16px rgba(255,122,26,.25)}
 .dn.cur{border-color:var(--or);color:var(--or);animation:pl 1.6s infinite}
 @keyframes pl{50%{box-shadow:0 0 18px rgba(255,122,0,.6)}}
-.phase{display:flex;gap:6px;margin:10px 0}.phase span{flex:1;font-size:11px;text-align:center;padding:6px 2px;border-radius:8px;background:#0a1828;color:var(--mute)}.phase span.on{background:var(--cy);color:#00141c;font-weight:700}
+.phase{display:flex;gap:6px;margin:10px 0}.phase span{flex:1;font-size:11px;text-align:center;padding:6px 2px;border-radius:8px;background:#1a1613;color:var(--mute)}.phase span.on{background:var(--cy);color:#00141c;font-weight:700}
 .tm{font:700 2.4rem var(--mono)}
-.q button{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#08121f}
-.q button.ok{border-color:var(--cy);background:rgba(0,255,200,.12)}.q button.no{border-color:var(--rd);background:rgba(255,59,92,.12)}
+.q button{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#1a1613}
+.q button.ok{border-color:var(--cy);background:rgba(255,122,26,.12)}.q button.no{border-color:var(--rd);background:rgba(255,59,92,.12)}
 /* memory */
 .mem{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .zone{min-height:150px}.zone h3{margin-top:0;font-size:.95rem;color:var(--mute)}
-.box{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;font:13px var(--mono);display:flex;justify-content:space-between;gap:8px;background:#08121f;transition:.3s}
-.box small{color:var(--mute)}.box.tgt{border-color:var(--pu);box-shadow:0 0 14px rgba(166,107,255,.6)}.box.ptr b{color:var(--pu)}.box.freed{border-color:var(--rd);opacity:.55;text-decoration:line-through}
-.line{display:block;padding:0 6px;border-radius:5px}.line.on{background:rgba(0,179,255,.25)}
-.note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#08121f;border-left:3px solid var(--bl)}.note.w{border-color:var(--rd);background:rgba(255,59,92,.1)}
+.box{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;font:13px var(--mono);display:flex;justify-content:space-between;gap:8px;background:#1a1613;transition:.3s}
+.box small{color:var(--mute)}.box.tgt{border-color:var(--pu);box-shadow:0 0 14px rgba(255,157,92,.6)}.box.ptr b{color:var(--pu)}.box.freed{border-color:var(--rd);opacity:.55;text-decoration:line-through}
+.line{display:block;padding:0 6px;border-radius:5px}.line.on{background:rgba(255,179,71,.25)}
+.note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#1a1613;border-left:3px solid var(--bl)}.note.w{border-color:var(--rd);background:rgba(255,59,92,.1)}
 /* guru */
 #chat{height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-.m{padding:9px 12px;border-radius:12px;max-width:88%;white-space:pre-wrap}.m.u{align-self:flex-end;background:#12385a}.m.g{background:#0e2236;border:1px solid var(--line)}
-input[type=text]{flex:1;min-width:0;background:#030810;border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--ink);font:inherit}
+.m{padding:9px 12px;border-radius:12px;max-width:88%;white-space:pre-wrap}.m.u{align-self:flex-end;background:#3a2a1e}.m.g{background:#1f1a16;border:1px solid var(--line)}
+input[type=text]{flex:1;min-width:0;background:#0d0b0a;border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--ink);font:inherit}
 .hint{color:var(--mute);font-size:13px}
-:root[data-theme=light]{--bg:#f2f8fd;--panel:#fff;--line:#c9dcec;--ink:#0a1a2a;--mute:#47627a;--cy:#007a63;--bl:#0069b3;--or:#c75a00;--pu:#7a3fd1;color-scheme:light}
-[data-theme=light] pre,[data-theme=light] input[type=text],[data-theme=light] .code,[data-theme=light] .box,[data-theme=light] .note,[data-theme=light] .q button,[data-theme=light] .m.g,[data-theme=light] .phase span,[data-theme=light] .bar{background:#eaf2f9}
-[data-theme=light] nav{background:rgba(242,248,253,.92)}[data-theme=light] .b3{color:#fff}[data-theme=light] .m.u{background:#cfe6fb}[data-theme=light] .dn.done{background:rgba(0,122,99,.12)}
-.code{width:100%;min-height:210px;background:#030810;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px;font:13.5px/1.6 var(--mono);resize:vertical;tab-size:2}
+:root[data-theme=light]{--bg:#f5f2ee;--panel:#fff;--line:#e4ddd3;--ink:#1c1612;--mute:#6b6055;--cy:#d9530a;--bl:#b8420a;--or:#c2410c;--pu:#9a3412;color-scheme:light}
+[data-theme=light] pre,[data-theme=light] input[type=text],[data-theme=light] .code,[data-theme=light] .box,[data-theme=light] .note,[data-theme=light] .q button,[data-theme=light] .m.g,[data-theme=light] .phase span,[data-theme=light] .bar{background:#f1ebe3}
+[data-theme=light] nav{background:rgba(245,242,238,.92)}[data-theme=light] .b3{color:#fff}[data-theme=light] .m.u{background:#ffe1c9}[data-theme=light] .dn.done{background:rgba(217,83,10,.12)}
+.code{width:100%;min-height:210px;background:#0d0b0a;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px;font:13.5px/1.6 var(--mono);resize:vertical;tab-size:2}
 .out{white-space:pre-wrap;min-height:70px;overflow-x:auto}.out.err{border-color:var(--rd)}.out.ok{border-color:var(--cy)}
-.hero{background:radial-gradient(circle at 85% 0,rgba(0,179,255,.22),transparent 55%),var(--panel)}.hero svg{width:100%;height:auto;margin:6px 0}
+.hero{background:radial-gradient(circle at 85% 0,rgba(255,179,71,.22),transparent 55%),var(--panel)}.hero svg{width:100%;height:auto;margin:6px 0}
 .chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mute);margin:2px 4px 0 0}
 .mod{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--ink)}.mod:hover{border-color:var(--cy)}.mod i{font:700 1.3rem var(--mono);font-style:normal;color:var(--cy);min-width:2.2ch}
 @media (max-width:560px){.mem{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .aurora i{position:absolute;width:55vmax;height:55vmax;border-radius:50%;filter:blur(90px);opacity:.35;animation:dr 14s ease-in-out infinite alternate}
-.aurora i:nth-child(1){background:#00b3ff;left:-20vmax;top:-20vmax}.aurora i:nth-child(2){background:#a66bff;right:-25vmax;bottom:-20vmax;animation-delay:-5s}.aurora i:nth-child(3){background:#00ffc8;left:30%;top:40%;width:30vmax;height:30vmax;opacity:.18;animation-delay:-9s}
+.aurora i:nth-child(1){background:#ffb347;left:-20vmax;top:-20vmax}.aurora i:nth-child(2){background:#ff9d5c;right:-25vmax;bottom:-20vmax;animation-delay:-5s}.aurora i:nth-child(3){background:#ff7a1a;left:30%;top:40%;width:30vmax;height:30vmax;opacity:.18;animation-delay:-9s}
 @keyframes dr{to{transform:translate(8vmax,6vmax) scale(1.15)}}
 #fx{position:absolute;inset:0;width:100%;height:100%;opacity:.45}
-.scene{transition:transform .2s}.ring{position:absolute;inset:-34px;border:2px dashed rgba(0,255,200,.5);border-radius:50%;animation:spin 12s linear infinite;transform:rotateX(70deg)}
-.ring.r2{inset:-60px;border-color:rgba(166,107,255,.55);animation-duration:18s;animation-direction:reverse}
+.scene{transition:transform .2s}.ring{position:absolute;inset:-34px;border:2px dashed rgba(255,122,26,.5);border-radius:50%;animation:spin 12s linear infinite;transform:rotateX(70deg)}
+.ring.r2{inset:-60px;border-color:rgba(255,157,92,.55);animation-duration:18s;animation-direction:reverse}
 @keyframes spin{to{transform:rotateX(70deg) rotateZ(360deg)}}
-.shine{background:linear-gradient(90deg,#fff,#00ffc8,#00b3ff,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 4s linear infinite}
+.shine{background:linear-gradient(90deg,#fff,#ff7a1a,#ffb347,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 4s linear infinite}
 @keyframes sh{to{background-position:-250% 0}}
-.by{position:relative;z-index:2;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:22px;font-size:13px;color:#8fb0c7}
-.by a{color:#e6f4ff;text-decoration:none;border:1px solid #173049;padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.05)}
+.by{position:relative;z-index:2;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:22px;font-size:13px;color:#a39889}
+.by a{color:#f4ede6;text-decoration:none;border:1px solid #2a2420;padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.05)}
 .avs{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid #ffb02e}
 .wa-f{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:30;background:#25d366;color:#052e16;font-weight:700;padding:11px 16px;border-radius:99px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .qb{margin-bottom:16px}
-#intro{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;overflow-y:auto;padding:calc(24px + env(safe-area-inset-top,0px)) 20px 24px;background:linear-gradient(160deg,#070a1f,#1b2468 70%,#3a3fb5);color:#fff}
+#intro{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;overflow-y:auto;padding:calc(24px + env(safe-area-inset-top,0px)) 20px 24px;background:linear-gradient(160deg,#0a0705,#2a1206 70%,#5a2208);color:#fff}
 #intro .sl{max-width:560px;margin:auto;width:100%;animation:up .5s}
 @keyframes up{from{opacity:0;transform:translateY(18px)}}
 .av{width:150px;height:150px;border-radius:50%;object-fit:cover;border:4px solid #ffb02e;box-shadow:0 0 0 8px rgba(255,176,46,.15),0 0 40px rgba(255,176,46,.4);display:block;margin:0 auto 14px}
@@ -116,24 +116,57 @@ input[type=text]{flex:1;min-width:0;background:#030810;border:1px solid var(--li
 .mbtn{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--panel);display:grid;place-content:center;gap:5px;flex:none}
 .mbtn span{display:block;width:22px;height:2px;background:var(--cy);border-radius:2px;transition:.3s}
 .mbtn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}.mbtn.open span:nth-child(2){opacity:0}.mbtn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
-#drawer{position:fixed;inset:0;z-index:40;visibility:hidden;background:rgba(2,6,12,0);transition:background .3s,visibility .3s}
-#drawer.open{visibility:visible;background:rgba(2,6,12,.6);backdrop-filter:blur(3px)}
+#drawer{position:fixed;inset:0;z-index:40;visibility:hidden;background:rgba(5,4,3,0);transition:background .3s,visibility .3s}
+#drawer.open{visibility:visible;background:rgba(5,4,3,.6);backdrop-filter:blur(3px)}
 .dr-in{position:absolute;top:0;right:0;bottom:0;width:min(86vw,340px);background:var(--panel);border-left:1px solid var(--line);padding:calc(18px + env(safe-area-inset-top,0px)) 16px 24px;overflow-y:auto;transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 #drawer.open .dr-in{transform:none}
 .dr-h{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:8px}
 .dr-h .avs{width:48px;height:48px}.dr-h small{display:block;color:var(--mute)}
 #dlist{display:flex;flex-direction:column;gap:4px}
 #dlist a,#dlist button{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 14px;border-radius:12px;color:var(--ink);text-decoration:none;background:transparent;border:0;text-align:left;font:inherit;font-size:16px;cursor:pointer}
-#dlist a:hover,#dlist button:hover,#dlist a.on{background:rgba(0,255,200,.1);color:var(--cy)}
+#dlist a:hover,#dlist button:hover,#dlist a.on{background:rgba(255,122,26,.1);color:var(--cy)}
 .dr-sep{height:1px;background:var(--line);margin:6px 0}
 .hero-ph{position:relative;width:190px;height:190px;margin:0 auto 20px;z-index:2;perspective:700px;transition:transform .2s}
 .hero-ph .ring{z-index:0}
-.avl{position:relative;z-index:1;width:100%;height:100%;border-radius:50%;object-fit:cover;border:4px solid #ffb02e;box-shadow:0 0 0 8px rgba(255,176,46,.15),0 0 60px rgba(0,255,200,.45);animation:flt 5s ease-in-out infinite}
+.avl{position:relative;z-index:1;width:100%;height:100%;border-radius:50%;object-fit:cover;border:4px solid #ffb02e;box-shadow:0 0 0 8px rgba(255,176,46,.15),0 0 60px rgba(255,122,26,.45);animation:flt 5s ease-in-out infinite}
 @keyframes flt{50%{transform:translateY(-8px)}}
-.nm{position:relative;z-index:2;font-size:2.4rem;line-height:1.1}.rl{position:relative;z-index:2;color:#8fb0c7;margin-top:6px;max-width:320px}
+.nm{position:relative;z-index:2;font-size:2.4rem;line-height:1.1}.rl{position:relative;z-index:2;color:#a39889;margin-top:6px;max-width:320px}
 .tg{position:relative;z-index:2;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;max-width:340px}
-.tg span{font-size:12.5px;padding:5px 11px;border-radius:99px;border:1px solid rgba(0,255,200,.35);background:rgba(0,255,200,.08);color:#bff}
+.tg span{font-size:12.5px;padding:5px 11px;border-radius:99px;border:1px solid rgba(255,122,26,.35);background:rgba(255,122,26,.08);color:#ffd7b8}
 .hero .row{gap:18px}
+.step{display:flex;gap:10px;align-items:flex-start;margin:16px 0 8px}.step i{flex:none;width:26px;height:26px;border-radius:50%;background:var(--cy);color:#00141c;font:700 14px var(--mono);font-style:normal;display:grid;place-items:center}.step span{font-size:14px;color:var(--mute);line-height:1.4}.step b{color:var(--ink)}.code.inp{min-height:120px}.out.cor{border-color:var(--cy);margin-top:10px}#sc{margin-top:4px}
+html:not([data-theme=light]) body{background:radial-gradient(900px 520px at 85% -8%,rgba(255,122,26,.14),transparent 60%),radial-gradient(700px 400px at -10% 40%,rgba(255,179,71,.06),transparent 60%),var(--bg);background-attachment:fixed}
+.it{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;color:#ff9d5c}
+.code{font-size:var(--fs,13.5px)}.rm *,.rm *::before{animation:none!important;transition:none!important}
+.navr{display:flex;gap:10px;align-items:center}.navr>a{display:flex;text-decoration:none}
+.pav{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--cy);flex:none;display:block}
+.pav.ini{display:grid;place-items:center;background:linear-gradient(135deg,#ff7a1a,#ffb347);color:#1a0c00;font:700 1.5rem var(--ui)}.pav.sm{width:40px;height:40px;font-size:1.05rem}
+.dr-h a{display:flex;text-decoration:none}
+.orb{width:96px;height:96px;border-radius:50%;margin:4px auto 0;background:radial-gradient(circle at 40% 35%,#ffe0bd,#ff7a1a 38%,#7a2a00 72%,#1a0a02);box-shadow:0 0 60px rgba(255,122,26,.55),inset 0 0 26px rgba(255,200,120,.4);animation:orb 4s ease-in-out infinite}
+@keyframes orb{50%{transform:scale(1.07);box-shadow:0 0 95px rgba(255,122,26,.75),inset 0 0 30px rgba(255,200,120,.5)}}
+.ember{background:radial-gradient(500px 260px at 50% 0,rgba(255,122,26,.22),transparent 70%),var(--panel);margin-bottom:14px}
+.bub{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:8px 0 8px auto;max-width:88%;font-size:14px;color:var(--mute)}
+.coach{font-size:1.4rem;line-height:1.3;margin:10px 0 14px}
+.act{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+.pf{display:grid;gap:14px}@media(min-width:760px){.pf{grid-template-columns:230px 1fr}}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;align-self:start}
+.side h4{font-size:11px;letter-spacing:.14em;color:var(--mute);margin:10px 8px 6px}
+.side button{display:flex;gap:10px;align-items:center;width:100%;min-height:46px;padding:0 10px;border:0;background:transparent;border-radius:10px;color:var(--ink);text-align:left;font:inherit}
+.side button.on{background:rgba(255,122,26,.14);color:var(--cy);box-shadow:inset 3px 0 0 var(--cy)}
+.ic{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;background:var(--bg);flex:none}
+@media(max-width:759px){.side{display:flex;overflow-x:auto;gap:6px;padding:8px}.side h4{display:none}.side button{width:auto;white-space:nowrap}}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:6px 18px}
+.sec{padding:16px 0;border-bottom:1px solid var(--line)}.sec:last-child{border:0}.sec h3{margin:0 0 2px;font-size:15px}.d{color:var(--mute);font-size:13px;margin-bottom:12px}
+.fld{display:grid;gap:12px}@media(min-width:520px){.fld.two{grid-template-columns:1fr 1fr}}
+.fld label{font-size:12px;color:var(--mute);display:block;margin-bottom:4px}
+.fld input,.fld textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink);font:inherit}
+.fld input:focus,.fld textarea:focus{outline:0;border-color:var(--cy);box-shadow:0 0 0 3px rgba(255,122,26,.22)}
+.err-t{color:var(--rd);font-size:12px;margin-top:4px}
+.pr{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.pr .btns{margin-left:auto;display:flex;gap:8px}
+.acct{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;margin-top:8px}.acct b{display:block;font-size:14px}.acct small{color:var(--mute)}
+.badge{margin-left:auto;font-size:12px;padding:6px 12px;border:1px solid var(--cy);color:var(--cy);border-radius:8px;text-decoration:none;background:transparent}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--cy);color:#1a0c00;font-weight:700;padding:10px 18px;border-radius:99px;z-index:70;box-shadow:0 8px 30px rgba(255,122,26,.4)}
+[data-theme=light] .ember,[data-theme=light] .act{background:#fff7ef}
 </style>
 </head>
 <body>
@@ -152,9 +185,9 @@ input[type=text]{flex:1;min-width:0;background:#030810;border:1px solid var(--li
 </section>
 
 <div id="app">
-<nav id="nav"><b>CForge</b><button class="mbtn" id="mb" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
-<div id="drawer" aria-hidden="true"><div class="dr-in"><div class="dr-h"><img class="avs" alt="Gokul"><div><b>Gokul</b><small>CSE student · C learner</small></div></div>
-<div id="dlist"><a href="#home">🏠 Home</a><a href="#lab">🧪 Training lab</a><a href="#modules">📚 Modules</a><a href="#roadmap">🗺️ Roadmap</a><a href="#memlab">🧠 Memory lab</a><a href="#exam">📝 Exam</a><a href="#guru">🤖 C Guru</a><div class="dr-sep"></div>
+<nav id="nav"><b>CForge</b><span class="navr"><a href="#profile" id="meA" aria-label="Profile and settings"></a><button class="mbtn" id="mb" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button></span></nav>
+<div id="drawer" aria-hidden="true"><div class="dr-in"><div class="dr-h"><a href="#profile" id="meB"></a><div><b id="meN">Learner</b><small id="meS">Profile & settings</small></div></div>
+<div id="dlist"><a href="#home">🏠 Home</a><a href="#lab">🧪 Training lab</a><a href="#modules">📚 Modules</a><a href="#roadmap">🗺️ Roadmap</a><a href="#memlab">🧠 Memory lab</a><a href="#exam">📝 Exam</a><a href="#guru">🤖 C Guru</a><a href="#profile">👤 Profile & settings</a><div class="dr-sep"></div>
 <a href="https://www.instagram.com/gokul_efx_" target="_blank" rel="noopener">📸 Instagram</a><a href="https://chat.whatsapp.com/IVixTTUCdaa59vDV9jiHwh" target="_blank" rel="noopener">💬 WhatsApp group</a><button id="ab">👤 About Gokul</button><button id="th" aria-label="Switch light or dark theme">🌓 Theme</button></div></div></div>
 <main id="view"></main>
 </div>
@@ -203,7 +236,7 @@ const G=[
 [/scanf/,"scanf needs addresses: scanf(\"%d\", &n). Forgetting & is the top beginner crash.","scanf-ku address venum: scanf(\"%d\", &n). & marandha crash aagum."]];
 const S0={done:{},xp:0,streak:0,last:"",lang:"en"};
 let S;try{S=Object.assign({},S0,JSON.parse(localStorage.getItem("cforge")||"{}"))}catch(e){S=Object.assign({},S0)}
-const save=()=>{try{localStorage.setItem("cforge",JSON.stringify(S))}catch(e){}try{window.cloudSave&&window.cloudSave()}catch(e){}};
+const save=()=>{try{localStorage.setItem("cforge",JSON.stringify(S))}catch(e){}};
 const $=s=>document.querySelector(s),V=$("#view");
 const doneN=()=>Object.keys(S.done).length,nextDay=()=>{for(let i=1;i<=60;i++)if(!S.done[i])return i;return 60};
 const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -226,10 +259,10 @@ function route(){
   const h=(location.hash||"#home").slice(1);
   document.querySelectorAll("#dlist a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+(h.startsWith("day")?"roadmap":h)));
   if(h.startsWith("day-")){pause();return lesson(+h.slice(4)||1)}
-  ({home,roadmap,memlab,guru,lab,modules,exam}[h]||home)();window.scrollTo(0,0)}
+  ({home,roadmap,memlab,guru,lab,modules,exam,profile}[h]||home)();window.scrollTo(0,0)}
 addEventListener("hashchange",route);
 function home(){const n=doneN(),nd=nextDay();
-  V.innerHTML=`<div class="card hero"><h2>Write your first C program in 10 minutes</h2><p>No install. Run Hello, change it, fix a bug, earn your first badge.</p><svg viewBox="0 0 600 90" role="img" aria-label="Source code goes through the compiler to the CPU and becomes output"><g font-family="monospace" font-size="13" text-anchor="middle"><g style="fill:var(--panel);stroke:var(--cy)" stroke-width="1.5"><rect x="6" y="24" width="108" height="44" rx="10"/><rect x="166" y="24" width="108" height="44" rx="10"/><rect x="326" y="24" width="108" height="44" rx="10"/><rect x="486" y="24" width="108" height="44" rx="10"/></g><g style="fill:var(--ink)"><text x="60" y="51">main.c</text><text x="220" y="51">compiler</text><text x="380" y="51">CPU</text><text x="540" y="51">output</text></g></g><g style="stroke:var(--bl)" stroke-width="2"><path d="M116 46h48M276 46h48M436 46h48"/></g><circle cy="46" r="6" style="fill:var(--or)"><animate attributeName="cx" values="60;540" dur="4s" repeatCount="indefinite"/></circle></svg><div class="row"><a href="#lab"><button class="b3">Start the 10-minute lab</button></a><a href="#modules"><button class="ghost">See all 12 modules</button></a></div></div>
+  V.innerHTML=`${emberCard()}<div class="card hero"><h2>Write your first C program in <em class="it">10 minutes</em></h2><p>No install. Run Hello, change it, fix a bug, earn your first badge.</p><svg viewBox="0 0 600 90" role="img" aria-label="Source code goes through the compiler to the CPU and becomes output"><g font-family="monospace" font-size="13" text-anchor="middle"><g style="fill:var(--panel);stroke:var(--cy)" stroke-width="1.5"><rect x="6" y="24" width="108" height="44" rx="10"/><rect x="166" y="24" width="108" height="44" rx="10"/><rect x="326" y="24" width="108" height="44" rx="10"/><rect x="486" y="24" width="108" height="44" rx="10"/></g><g style="fill:var(--ink)"><text x="60" y="51">main.c</text><text x="220" y="51">compiler</text><text x="380" y="51">CPU</text><text x="540" y="51">output</text></g></g><g style="stroke:var(--bl)" stroke-width="2"><path d="M116 46h48M276 46h48M436 46h48"/></g><circle cy="46" r="6" style="fill:var(--or)"><animate attributeName="cx" values="60;540" dur="4s" repeatCount="indefinite"/></circle></svg><div class="row"><a href="#lab"><button class="b3">Start the 10-minute lab</button></a><a href="#modules"><button class="ghost">See all 12 modules</button></a></div></div>
   <h2 style="margin-top:20px">Dashboard</h2>
   <div class="grid"><div class="card stat"><b>${nd}</b><span>Today’s lesson</span></div><div class="card stat"><b>${S.streak}</b><span>Day streak</span></div><div class="card stat"><b>${S.xp}</b><span>XP</span></div><div class="card stat"><b>${n}/60</b><span>Days done</span></div></div>
   <div class="card" style="margin-top:12px"><b>${esc(T[nd-1])}</b><div class="bar"><div style="width:${n/60*100}%"></div></div>
@@ -489,29 +522,45 @@ function selfTest(){const bad=[];
  chk("switch+string",'#include <stdio.h>\nint main(){char s[10]="hey";int x=2;switch(x){case 1:printf("a");break;case 2:printf("%s!",s);break;}return 0;}',"",r=>!r.err&&r.out==="hey!");
  return bad}
 
-function lab(){S.lab=S.lab||{};let k=0,hi=0;const codes=EX.map(e=>e.code),ins=EX.map(e=>e.cases[0][0]);
- const draw=()=>{const e=EX[k];V.innerHTML=`<h2>Training lab</h2><div class="row">${EX.map((x,i)=>`<button class="ghost ${i===k?"on":""}" data-k="${i}">${S.lab[i]?"✓ ":""}${i+1}. ${x.t}</button>`).join("")}</div>
- <div class="card"><b>${e.t}</b><p>${e.d}</p><textarea class="code" id="cd" wrap="off" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="C code">${esc(codes[k])}</textarea>
- <div class="row"><label class="hint" for="in">Input</label><input type="text" id="in" value="${esc(ins[k])}" autocapitalize="off" autocorrect="off" autocomplete="off"></div>
+function lab(){S.lab=S.lab||{};S.sv=S.sv||{};let k=0,hi=0,tmr;
+ const codes=EX.map((e,i)=>S.sv[i]?S.sv[i].c:e.code),ins=EX.map((e,i)=>S.sv[i]?S.sv[i].i:e.cases[0][0]);
+ const keep=(o,x)=>{const old=S.sv[k]||{};S.sv[k]={c:codes[k]||"",i:ins[k]||"",o:(o===undefined?old.o:o)||"",x:(x===undefined?old.x:x)?1:0};save()};
+ const draw=()=>{const e=EX[k],sv=S.sv[k]||{};
+  V.innerHTML=`<h2>Training lab</h2><p class="hint">Pick an exercise, write C code, press Run, and compare with the correct output.</p>
+ <div class="row">${EX.map((x,i)=>`<button class="ghost ${i===k?"on":""}" data-k="${i}">${S.lab[i]?"✓ ":""}${i+1}. ${x.t}</button>`).join("")}</div>
+ <div class="card"><b style="font-size:1.15rem">${e.t}</b>
+ <div class="step"><i>1</i><span><b>Your task</b><br>${e.d}</span></div>
+ <div class="step"><i>2</i><span><b>Write your C code</b> in this box</span></div>
+ <textarea class="code" id="cd" wrap="off" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="C code">${esc(codes[k])}</textarea>
+ <div class="step"><i>3</i><span><b>Input</b> (numbers your program reads with scanf; leave empty if there are none)</span></div>
+ <textarea class="code inp" id="in" rows="5" wrap="off" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Program input">${esc(ins[k])}</textarea>
+ <div class="step"><i>4</i><span><b>Press Run</b></span></div>
  <div class="row"><button class="b3" id="run">Run</button><button class="ghost" id="hint">Hint</button><button class="ghost" id="rs">Reset</button></div>
- <pre class="out" id="out">Press Run to see your output here.</pre><p class="hint" id="hm"></p></div>
- <p class="hint">Lab version 3 · Browser C runner: variables, if, loops, switch, arrays, strings, functions, scanf and printf. Pointers and structs are in the Memory lab.</p>`;
-  V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{codes[k]=$("#cd").value;ins[k]=$("#in").value;k=+b.dataset.k;hi=0;draw()});
-  $("#rs").onclick=()=>{codes[k]=e.code;ins[k]=e.cases[0][0];draw()};
+ <div class="step"><i>5</i><span><b>Your output</b> (saved for next time)</span></div>
+ <pre class="out${sv.x?" err":""}" id="out">${esc(sv.o||"Your output will appear here after you press Run.")}</pre><p class="hint" id="hm"></p>
+ <button class="ghost" id="sc">Show correct output</button>
+ <pre class="out cor" id="co" style="display:none">${esc(e.cases.map(c=>"Input: "+(c[0]||"(none)")+"\n→ "+c[1]).join("\n\n"))}</pre></div>
+ <p class="hint">Lab version 4 · Browser C runner: variables, if, loops, switch, arrays, strings, functions, scanf and printf. Pointers and structs are in the Memory lab.</p>`;
+  const sync=()=>{codes[k]=$("#cd").value;ins[k]=$("#in").value};
+  const sch=()=>{clearTimeout(tmr);tmr=setTimeout(()=>{sync();keep()},400)};
+  $("#cd").oninput=sch;$("#in").oninput=sch;
+  V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{clearTimeout(tmr);sync();keep();k=+b.dataset.k;hi=0;draw()});
+  $("#rs").onclick=()=>{clearTimeout(tmr);delete S.sv[k];codes[k]=e.code;ins[k]=e.cases[0][0];save();draw()};
   $("#hint").onclick=()=>{$("#hm").textContent="Hint "+(hi+1)+": "+e.h[Math.min(hi++,2)]};
+  $("#sc").onclick=()=>{const c=$("#co"),h=c.style.display==="none";c.style.display=h?"block":"none";$("#sc").textContent=h?"Hide correct output":"Show correct output"};
   $("#run").onclick=()=>{const o=$("#out"),hm=$("#hm");
-   try{const code=$("#cd").value;codes[k]=code;ins[k]=$("#in").value;hm.textContent="";
-    const r=runC(code,ins[k]);
-    if(r.err){o.className="out err";o.textContent=(r.out?r.out+"\n":"")+(r.err.kind==="compile"?"Compile error":"Error")+(r.err.line?" on line "+r.err.line:"")+": "+r.err.msg;
-     hm.textContent=r.err.kind==="compile"?"Fix this error, then press Run again.":"";o.scrollIntoView({block:"nearest",behavior:"smooth"});return}
-    o.className="out";o.textContent=r.out||"(nothing printed yet)";
-    if(!r.out){hm.textContent="Your code has nothing to print yet. Add a printf line inside main(), then press Run. Tap Hint if you need help.";o.scrollIntoView({block:"nearest",behavior:"smooth"});return}
+   const show=(t,er)=>{o.className="out"+(er?" err":"");o.textContent=t;keep(t,er);o.scrollIntoView({block:"nearest",behavior:"smooth"})};
+   try{clearTimeout(tmr);sync();const code=codes[k],inp=ins[k];hm.textContent="";
+    if(/#include|printf|main\s*\(/.test(inp)){show("The Input box has code in it.\nPut your C code in the big code box above. The Input box is only for numbers.",1);hm.textContent="Clear the Input box, then press Run again.";return}
+    const r=runC(code,inp);
+    if(r.err){show((r.out?r.out+"\n":"")+(r.err.kind==="compile"?"Compile error":"Error")+(r.err.line?" on line "+r.err.line:"")+": "+r.err.msg,1);hm.textContent=r.err.kind==="compile"?"Fix this error, then press Run again.":"";return}
+    show(r.out||"(nothing printed yet)",0);
+    if(!r.out){hm.textContent="Your code has nothing to print yet. Add a printf line inside main(), then press Run. Tap Hint if you need help.";return}
     let pass=0;for(const [ci,exp] of e.cases){const q=runC(code,ci);if(!q.err&&norm(q.out)===norm(exp))pass++}
     if(pass===e.cases.length){hm.textContent="Correct! "+(e.cases.length>1?"All "+e.cases.length+" tests passed.":"");
      if(!S.lab[k]){S.lab[k]=1;S.xp+=30;save();hm.textContent+=" +30 XP"+(k===0?" · Badge unlocked: First C Program":"")}}
-    else hm.textContent=pass?"Passed "+pass+" of "+e.cases.length+" tests. It works for some inputs but fails on others: check special cases.":"Not matching yet. Check your code and try again.";
-    o.scrollIntoView({block:"nearest",behavior:"smooth"})
-   }catch(x){console.error(x);o.className="out err";o.textContent="Internal error: "+x.message+"\nPlease tell Gokul.";}};
+    else hm.textContent=pass?"Passed "+pass+" of "+e.cases.length+" tests. It works for some inputs but fails on others: check special cases.":"Not matching yet. Compare with the correct output below and try again."
+   }catch(x){console.error(x);o.className="out err";o.textContent="Internal error: "+x.message+"\nPlease tell Gokul."}};
  };
  draw()}
 {const bad=selfTest();if(bad.length){console.error("CForge lab self-test failed:",bad);const b=document.createElement("div");b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99;background:#ff3b5c;color:#fff;padding:8px 12px;font:13px sans-serif";b.textContent="Lab self-test failed ("+bad.join(", ")+"). Please tell Gokul.";document.body.appendChild(b)}}
@@ -536,8 +585,8 @@ document.querySelectorAll(".avs,.avl").forEach(i=>i.src=PHOTO);
 (function(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
  const c=document.getElementById("fx"),x=c.getContext("2d"),T=["int","char","*","&","{}","0x","if","for","malloc","free","1","0","NULL",";"];let W,H,n,d;
  const rs=()=>{W=c.width=innerWidth;H=c.height=innerHeight;n=Math.ceil(W/46);d=Array.from({length:n},()=>Math.random()*-40)};rs();addEventListener("resize",rs);
- (function f(){x.fillStyle="rgba(2,6,12,.18)";x.fillRect(0,0,W,H);x.font="14px monospace";
-  for(let i=0;i<n;i++){x.fillStyle=Math.random()<.04?"#fff":"rgba(0,255,200,.55)";x.fillText(T[(Math.random()*T.length)|0],i*46,d[i]*18);if(d[i]*18>H&&Math.random()>.97)d[i]=0;d[i]+=.5}
+ (function f(){x.fillStyle="rgba(5,4,3,.18)";x.fillRect(0,0,W,H);x.font="14px monospace";
+  for(let i=0;i<n;i++){x.fillStyle=Math.random()<.04?"#fff":"rgba(255,122,26,.55)";x.fillText(T[(Math.random()*T.length)|0],i*46,d[i]*18);if(d[i]*18>H&&Math.random()>.97)d[i]=0;d[i]+=.5}
   if($("#enter").style.display!=="none")requestAnimationFrame(f)})()})();
 {const en=$("#enter"),sc=en.querySelector(".hero-ph");en.addEventListener("pointermove",e=>{sc.style.transform="rotateY("+((e.clientX/innerWidth-.5)*30)+"deg) rotateX("+((e.clientY/innerHeight-.5)*-30)+"deg)"})}
 $("#ab").onclick=()=>showIntro(0);
@@ -599,20 +648,59 @@ function renderQuiz(d){const box=$("#quiz"),qs=qsFor(d);S.qa=S.qa||{};
   bl.querySelector(".hint").textContent=ok?"Correct!":"Not quite. The right answer is highlighted.";an++;
   if(ok){sc++;const k=d+"-"+bl.dataset.i;if(!S.qa[k]){S.qa[k]=1;S.xp+=5;save()}}
   $("#qs").textContent="Score: "+sc+" / "+qs.length+(an===qs.length?(sc===qs.length?" · Perfect!":" · Done"):"")}))}
-</script>
-<script type="module">
-const V0="10.12.2",B="https://www.gstatic.com/firebasejs/"+V0+"/";
-const {initializeApp}=await import(B+"firebase-app.js");
-const {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}=await import(B+"firebase-auth.js");
-const {getDatabase,ref,get,set}=await import(B+"firebase-database.js");
-const app=initializeApp({apiKey:"AIzaSyCiejOPNqtM5_yo4b70oSIwq83y-ZsdMSU",authDomain:"c-progarmin.firebaseapp.com",databaseURL:"https://c-progarmin-default-rtdb.firebaseio.com",projectId:"c-progarmin",storageBucket:"c-progarmin.firebasestorage.app",messagingSenderId:"226410285609",appId:"1:226410285609:web:b6258a68d1eea824136a38"});
-const auth=getAuth(app),db=getDatabase(app);
-const btn=document.createElement("button");btn.className="ghost";btn.textContent="Sign in";document.getElementById("dlist").appendChild(btn);
-let user=null,t;
-btn.onclick=()=>user?signOut(auth):signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert("Sign-in failed: "+e.code));
-window.cloudSave=()=>{if(!user)return;clearTimeout(t);t=setTimeout(()=>set(ref(db,"users/"+user.uid),{done:S.done,xp:S.xp,streak:S.streak,last:S.last,lab:S.lab||{},lang:S.lang,name:user.displayName||"",updated:Date.now()}).catch(console.error),800)};
-onAuthStateChanged(auth,async u=>{user=u;btn.textContent=u?"Sign out ("+(u.displayName||"you").split(" ")[0]+")":"Sign in";if(!u)return;
- try{const s=await get(ref(db,"users/"+u.uid));if(s.exists()){const c=s.val();S.done=Object.assign({},c.done,S.done);S.lab=Object.assign({},c.lab,S.lab);S.xp=Math.max(S.xp,c.xp||0);if((c.streak||0)>S.streak){S.streak=c.streak;S.last=c.last}}save();route()}catch(e){console.error(e)}});
+/* ---- Ember theme extras: profile & settings, coach card ---- */
+const q=s=>esc(String(s||"")).replace(/"/g,"&quot;");
+const me=()=>{const p=S.pf||{},u=window.cfUser,n=((p.fn||"")+" "+(p.ln||"")).trim()||(u&&u.displayName)||"Learner";return{n,p,u}};
+const avh=(ph,n,sm)=>ph?`<img class="pav${sm?" sm":""}" src="${ph}" alt="">`:`<span class="pav ini${sm?" sm":""}">${esc((n||"L")[0].toUpperCase())}</span>`;
+function applyMe(){const{n,p,u}=me();$("#meA").innerHTML=avh(p.photo,n,1);$("#meB").innerHTML=avh(p.photo,n,1);$("#meN").textContent=n;$("#meS").textContent=(u&&u.email)||"Profile & settings"}
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+document.documentElement.style.setProperty("--fs",(S.fs||13.5)+"px");document.documentElement.classList.toggle("rm",!!S.rm);
+applyMe();addEventListener("cfauth",()=>{applyMe();if(location.hash==="#profile")profile()});
+function emberCard(){const{n}=me(),f=n.split(" ")[0],nd=nextDay();
+ return `<div class="card ember"><div class="orb"></div><p class="hint" style="text-align:center;margin-top:12px">Your C coach</p>
+ <div class="bub">I’m stuck on pointers. Should I skip them?</div>
+ <p class="coach">No need, ${esc(f)}. A pointer is just an address. Your streak is <em class="it">${S.streak?"still alive":"ready to start"}</em>.</p>
+ <div class="act"><div><b>Two tweaks to keep your pace</b><br><small class="hint">Memory lab, 5 min · Day ${nd}: ${esc(T[nd-1])}</small></div><a href="#memlab"><button class="b3">Open memory lab</button></a></div></div>`}
+function profile(){const tab=window._pt||"account",L=[["GENERAL"],["account","👤","Account"],["learn","📈","Learning"],["lang","🌐","Language"],["SYSTEM"],["look","🎨","Appearance"],["about","ℹ️","About"]];
+ V.innerHTML=`<h2>Profile & settings</h2><p class="hint">Manage your details and preferences.</p><div class="pf"><div class="side">${L.map(t=>t.length===1?`<h4>${t[0]}</h4>`:`<button data-t="${t[0]}" class="${t[0]===tab?"on":""}"><span class="ic">${t[1]}</span>${t[2]}</button>`).join("")}</div><div class="pane" id="pane"></div></div>`;
+ V.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{window._pt=b.dataset.t;profile()});
+ ({account:pAcct,learn:pLearn,lang:pLang,look:pLook,about:pAbout}[tab]||pAcct)($("#pane"))}
+function pAcct(P){const{n,p,u}=me(),dn=(u&&u.displayName||"").split(" ");let pend;
+ const fv=p.fn!==undefined?p.fn:dn[0]||"",lv=p.ln!==undefined?p.ln:dn.slice(1).join(" "),ev=p.email!==undefined?p.email:(u&&u.email)||"";
+ P.innerHTML=`<div class="sec"><h3>Account</h3><p class="d">Your learning profile${u?" (synced to your cloud account)":" on this device"}.</p>
+ <div class="pr"><span id="pp"></span><div><b>Profile picture</b><br><small class="hint">PNG or JPEG under 2 MB</small></div><span class="btns"><button class="ghost" id="up">Upload new picture</button><button class="ghost" id="dl">Delete</button></span></div><input type="file" id="fi" accept="image/png,image/jpeg" hidden></div>
+ <div class="sec"><h3>Full name</h3><div class="fld two"><div><label for="fn">First name</label><input id="fn" value="${q(fv)}" maxlength="40"></div><div><label for="ln">Last name</label><input id="ln" value="${q(lv)}" maxlength="40"></div></div></div>
+ <div class="sec"><h3>Contact email</h3><p class="d">Used for your certificate and progress emails.</p><div class="fld"><div><label for="em">Email</label><input id="em" type="email" value="${q(ev)}" maxlength="80" autocapitalize="off"><div class="err-t" id="eE"></div></div></div></div>
+ <div class="sec"><h3>Short bio</h3><div class="fld"><textarea id="bio" rows="3" maxlength="160" placeholder="Tell others what you are learning">${esc(p.bio||"")}</textarea></div></div>
+ <div class="sec"><h3>Connected accounts</h3><p class="d">Manage your sign-in and community links.</p>
+ <div class="acct"><span class="ic">G</span><div><b>Google sign-in</b><small>${u?esc(u.email||"Signed in"):"Save your progress to the cloud"}</small></div><button class="badge" id="gs">${u?"Connected":"Connect"}</button></div>
+ <div class="acct"><span class="ic">📸</span><div><b>Instagram</b><small>@gokul_efx_</small></div><a class="badge" href="${IG}" target="_blank" rel="noopener">Follow</a></div>
+ <div class="acct"><span class="ic">💬</span><div><b>WhatsApp group</b><small>Ask doubts, share projects</small></div><a class="badge" href="${WA}" target="_blank" rel="noopener">Join</a></div></div>
+ <div class="sec row" style="justify-content:flex-end"><button class="ghost" id="cn">Cancel</button><button class="b3" id="sv">Save changes</button></div>`;
+ const pp=()=>{$("#pp").innerHTML=avh(pend===undefined?p.photo:pend,$("#fn").value||n,0)};pp();$("#fn").oninput=pp;
+ $("#up").onclick=()=>$("#fi").click();
+ $("#fi").onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>2097152){toast("Picture must be under 2 MB");return}
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const s=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);pend=c.toDataURL("image/jpeg",.75);pp()};im.src=r.result};r.readAsDataURL(f)};
+ $("#dl").onclick=()=>{pend="";pp()};
+ $("#gs").onclick=()=>window.cfSign?window.cfSign():toast("Google sign-in works on your Firebase-hosted site");
+ $("#cn").onclick=()=>pAcct(P);
+ $("#sv").onclick=()=>{const em=$("#em").value.trim(),er=$("#eE"),b=$("#sv");er.textContent="";if(em&&!/^\S+@\S+\.\S+$/.test(em)){er.textContent="Enter a valid email address.";return}
+  b.disabled=true;b.textContent="Saving…";
+  setTimeout(()=>{S.pf={fn:$("#fn").value.trim(),ln:$("#ln").value.trim(),email:em,bio:$("#bio").value.trim(),photo:pend===undefined?(p.photo||""):pend};save();applyMe();b.disabled=false;b.textContent="Save changes";toast("Profile updated ✓")},600)}}
+function pLearn(P){const n=doneN(),lb=Object.keys(S.lab||{}).length,qa=Object.keys(S.qa||{}).length;
+ P.innerHTML=`<div class="sec"><h3>Learning overview</h3><p class="d">Real activity from your lessons and labs.</p><div class="grid"><div class="card stat"><b>${n}/60</b><span>Days done</span></div><div class="card stat"><b>${S.xp}</b><span>XP</span></div><div class="card stat"><b>${S.streak}</b><span>Day streak</span></div><div class="card stat"><b>${lb}/${EX.length}</b><span>Lab exercises</span></div><div class="card stat"><b>${qa}</b><span>Quiz answers right</span></div></div></div>
+ <div class="sec"><h3>Reset progress</h3><p class="d">Clears lessons, XP, streak and saved lab work.</p><button class="ghost" id="rp" style="border-color:var(--rd);color:var(--rd)">Reset my progress</button></div>`;
+ $("#rp").onclick=()=>{if(confirm("Reset all your progress? This cannot be undone.")){S.done={};S.xp=0;S.streak=0;S.last="";S.lab={};S.sv={};S.qa={};save();toast("Progress reset");pLearn(P)}}}
+function pLang(P){P.innerHTML=`<div class="sec"><h3>Explanation language</h3><p class="d">Used for lessons and C Guru answers.</p><div class="row"><button class="ghost ${S.lang==="en"?"on":""}" data-l="en">English</button><button class="ghost ${S.lang==="ta"?"on":""}" data-l="ta">Tanglish (Tamil + English)</button></div></div>`;
+ P.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{S.lang=b.dataset.l;save();pLang(P);toast("Language saved")})}
+function pLook(P){const th=document.documentElement.dataset.theme;
+ P.innerHTML=`<div class="sec"><h3>Theme</h3><p class="d">Ember dark or clean light.</p><div class="row"><button class="ghost ${th!=="light"?"on":""}" data-th="dark">Ember dark</button><button class="ghost ${th==="light"?"on":""}" data-th="light">Light</button></div></div>
+ <div class="sec"><h3>Code font size</h3><p class="d" id="fsd">${S.fs||13.5} px</p><input type="range" id="fs" min="11" max="20" step=".5" value="${S.fs||13.5}" style="width:100%"></div>
+ <div class="sec"><h3>Reduce motion</h3><p class="d">Turns off animations.</p><button class="ghost ${S.rm?"on":""}" id="rm">${S.rm?"On":"Off"}</button></div>`;
+ P.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{S.theme=b.dataset.th;ap(S.theme);save();pLook(P)});
+ $("#fs").oninput=e=>{S.fs=+e.target.value;document.documentElement.style.setProperty("--fs",S.fs+"px");$("#fsd").textContent=S.fs+" px";save()};
+ $("#rm").onclick=()=>{S.rm=!S.rm;document.documentElement.classList.toggle("rm",S.rm);save();pLook(P)}}
+function pAbout(P){P.innerHTML=`<div class="sec"><h3>About CForge</h3><p class="d">Learn C by watching memory move. Built by Gokul, a CSE student learning cybersecurity.</p><div class="row"><button class="ghost" id="ai">Meet Gokul</button><a href="${IG}" target="_blank" rel="noopener"><button class="ghost">Instagram</button></a><a href="${WA}" target="_blank" rel="noopener"><button class="ghost">WhatsApp</button></a></div></div>`;$("#ai").onclick=()=>showIntro(0)}
 </script>
 </body>
 </html>

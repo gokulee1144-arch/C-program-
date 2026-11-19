@@ -81,7 +81,7 @@ input[type=text]{flex:1;min-width:0;background:#030810;border:1px solid var(--li
 [data-theme=light] pre,[data-theme=light] input[type=text],[data-theme=light] .code,[data-theme=light] .box,[data-theme=light] .note,[data-theme=light] .q button,[data-theme=light] .m.g,[data-theme=light] .phase span,[data-theme=light] .bar{background:#eaf2f9}
 [data-theme=light] nav{background:rgba(242,248,253,.92)}[data-theme=light] .b3{color:#fff}[data-theme=light] .m.u{background:#cfe6fb}[data-theme=light] .dn.done{background:rgba(0,122,99,.12)}
 .code{width:100%;min-height:210px;background:#030810;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px;font:13.5px/1.6 var(--mono);resize:vertical;tab-size:2}
-.out{white-space:pre-wrap;min-height:70px}.out.err{border-color:var(--rd)}.out.ok{border-color:var(--cy)}
+.out{white-space:pre-wrap;min-height:70px;overflow-x:auto}.out.err{border-color:var(--rd)}.out.ok{border-color:var(--cy)}
 .hero{background:radial-gradient(circle at 85% 0,rgba(0,179,255,.22),transparent 55%),var(--panel)}.hero svg{width:100%;height:auto;margin:6px 0}
 .chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mute);margin:2px 4px 0 0}
 .mod{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--ink)}.mod:hover{border-color:var(--cy)}.mod i{font:700 1.3rem var(--mono);font-style:normal;color:var(--cy);min-width:2.2ch}
@@ -281,36 +281,239 @@ P.loop={name:"for loop",code:["int sum = 0;","for (int i = 1; i <= 3; i++)","  s
 const ar=(a,p)=>{const r=a.map((v,j)=>({n:"a["+j+"]",v,a:"0x"+(1000+j*4)}));if(p)r.push({n:"p",v:"0x1000",a:"0x1010",to:"a[0]"});return r};
 P.arr={name:"Array and pointer",code:["int a[3] = {5, 8, 2};","a[1] = 9;","int *p = a;"],steps:[{l:0,st:ar([5,8,2]),n:"An array is boxes side by side. Indexes start at 0. Each int is 4 bytes, so addresses go up by 4."},{l:1,st:ar([5,9,2]),n:"a[1] is the second box. It now holds 9."},{l:2,st:ar([5,9,2],1),n:"An array name is the address of its first box. p points at a[0]."}]};
 /* training lab */
+/* ---- Mini C runner (browser). Supports int/float/char, if, loops, switch, arrays, strings, functions, scanf, printf ---- */
+function runC(src,input){
+ class F{constructor(x){this.f=x}}
+ const isF=v=>v instanceof F,val=v=>isF(v)?v.f:v;
+ let cl=1;
+ const CE=(l,m,k)=>{const e=new Error(m);e.line=l;e.kind=k||"runtime";throw e};
+ let out="",steps=0,ip=0,depth=0,hasIO=false,ioLine=0;input=input||"";
+ src=String(src).replace(/[\u201c\u201d]/g,'"').replace(/[\u2018\u2019]/g,"'").replace(/\u00a0/g," ");
+ const dec=s=>s.replace(/\\(n|t|r|0|\\|"|'|a)/g,(m,c)=>({n:"\n",t:"\t",r:"\r",0:"\0",a:"\x07"}[c]||c));
+ const T=[],defs={};let line=1,m;
+ const re=/\/\/[^\n]*|\/\*[\s\S]*?\*\/|#[^\n]*|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)'|0[xX][0-9a-fA-F]+|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?[fFlLuU]*|[A-Za-z_]\w*|<<=|>>=|\+\+|--|\+=|-=|\*=|\/=|%=|==|!=|<=|>=|&&|\|\||<<|>>|->|[-+*\/%=<>!&|^~?:;,(){}\[\].]|\n|[ \t\r]+|[\s\S]/g;
+ const numTok=(d,l)=>({k:"n",v:/[.eE]/.test(d)?new F(parseFloat(d)):parseInt(d,10),l});
+ try{
+ while((m=re.exec(src))){const s=m[0],c=s[0];
+  if(s==="\n"){line++;continue}
+  if(/^[ \t\r]+$/.test(s)||s.startsWith("//"))continue;
+  if(s.startsWith("/*")){line+=(s.match(/\n/g)||[]).length;continue}
+  if(c==="#"){const d=s.match(/^#\s*define\s+([A-Za-z_]\w*)\s+(.+?)\s*$/);if(d)defs[d[1]]=d[2];if(/^#\s*include\s*<stdio\.h>/.test(s))hasIO=true;continue}
+  if(s==='"')CE(line,'missing closing " quote',"compile");
+  if(s==="'")CE(line,"missing closing ' quote","compile");
+  if(c==='"')T.push({k:"s",v:dec(s.slice(1,-1)),l:line});
+  else if(c==="'")T.push({k:"n",v:dec(s.slice(1,-1)).charCodeAt(0),l:line});
+  else if(/^0[xX]/.test(s))T.push({k:"n",v:parseInt(s,16),l:line});
+  else if(/^[\d.]/.test(c)&&s.length>0&&!(s==="."))T.push(numTok(s.replace(/[fFlLuU]+$/,""),line));
+  else if(/[A-Za-z_]/.test(c)){const d=defs[s];T.push(d!==undefined?(/^[\d.]+$/.test(d)?numTok(d,line):{k:"id",v:d,l:line}):{k:"id",v:s,l:line})}
+  else if(s.length===1&&!"-+*/%=<>!&|^~?:;,(){}[].".includes(c))CE(line,"unexpected character '"+s+"'","compile");
+  else T.push({k:"op",v:s,l:line})}
+ let p=0;const EOF={k:"eof",v:"",l:T.length?T[T.length-1].l:1};
+ const peek=()=>T[p]||EOF,nx=()=>T[p++]||EOF,at=v=>{const t=peek();return t.v===v&&(t.k==="op"||t.k==="id")};
+ const ex=v=>{if(at(v))return nx();const pl=T[p-1]?T[p-1].l:1;CE(v===";"||v===")"||v==="}"||v==="]"?pl:peek().l,v===";"?"missing ; at the end of this line":"expected '"+v+"' here","compile")};
+ const NOPTR=l=>CE(l,"Pointers aren’t supported in this browser runner yet. Try the Memory lab for pointers.","compile");
+ const TY=["int","long","short","char","float","double","unsigned","signed","void","const","static"];
+ const isTy=()=>peek().k==="id"&&TY.includes(peek().v);
+ const ptype=()=>{const w=[];while(isTy())w.push(nx().v);const s=w.join(" ");return /float|double/.test(s)?"f":/char/.test(s)?"c":/unsigned/.test(s)?"u32":/long/.test(s)?"i64":/void/.test(s)?"v":"i32"};
+ const arrN=new Set(),badScan=[],PR={"||":1,"&&":2,"|":3,"^":4,"&":5,"==":6,"!=":6,"<":7,">":7,"<=":7,">=":7,"<<":8,">>":8,"+":9,"-":9,"*":10,"/":10,"%":10};
+ const asg=()=>{const l=tern();const t=peek();if(t.k==="op"&&["=","+=","-=","*=","/=","%="].includes(t.v)){nx();const r=asg();if(l.t!=="var"&&l.t!=="idx")CE(t.l,"the left side of "+t.v+" must be a variable","compile");return{t:"asg",op:t.v,a:l,b:r,l:t.l}}return l};
+ const tern=()=>{const c=bin(1);if(at("?")){nx();const a=asg();ex(":");const b=tern();return{t:"cond",c,a,b}}return c};
+ const bin=min=>{let l=un();for(;;){const t=peek(),pr=t.k==="op"&&PR[t.v];if(!pr||pr<min)return l;nx();const r=bin(pr+1);l={t:"bin",op:t.v,a:l,b:r,l:t.l}}};
+ const un=()=>{const t=peek();
+  if(t.k==="op"){if(["!","-","+","~"].includes(t.v)){nx();return{t:"un",op:t.v,a:un(),l:t.l}}
+   if(t.v==="++"||t.v==="--"){nx();return{t:"pre",op:t.v,a:un(),l:t.l}}
+   if(t.v==="&"){nx();return{t:"addr",a:un(),l:t.l}}
+   if(t.v==="*")NOPTR(t.l);
+   if(t.v==="("&&T[p+1]&&TY.includes(T[p+1].v)){nx();const ty=ptype();if(at("*"))NOPTR(t.l);ex(")");return{t:"cast",ty,a:un(),l:t.l}}}
+  if(t.k==="id"&&t.v==="sizeof"){nx();ex("(");const ty=ptype();ex(")");return{t:"num",v:{c:1,i32:4,u32:4,i64:8,f:8,v:1}[ty]||4}}
+  return post()};
+ const post=()=>{let n=prim();for(;;){const t=peek();
+  if(t.k==="op"&&t.v==="("){if(n.t!=="var")CE(t.l,"only a function name can be called","compile");nx();const a=[];while(!at(")")){a.push(asg());if(!at(","))break;nx()}ex(")");
+   if(/^(printf|scanf|puts|putchar)$/.test(n.name)&&!ioLine)ioLine=t.l;
+   if(n.name==="scanf")a.slice(1).forEach(x=>{if(x.t==="var")badScan.push([x.name,t.l])});n={t:"call",name:n.name,a,l:t.l}}
+  else if(t.k==="op"&&t.v==="["){nx();const i=asg();ex("]");n={t:"idx",a:n,i,l:t.l}}
+  else if(t.k==="op"&&(t.v==="++"||t.v==="--")){nx();n={t:"post",op:t.v,a:n,l:t.l}}
+  else if(t.k==="op"&&(t.v==="."||t.v==="->"))CE(t.l,"structs aren’t supported in this browser runner yet","compile");
+  else return n}};
+ const prim=()=>{const t=nx();if(t.k==="n")return{t:"num",v:t.v};if(t.k==="s"){let s=t.v;while(peek().k==="s")s+=nx().v;return{t:"str",v:s}}
+  if(t.k==="id"&&!TY.includes(t.v))return{t:"var",name:t.v,l:t.l};
+  if(t.k==="op"&&t.v==="("){const e=asg();ex(")");return e}
+  CE(t.l||peek().l,"unexpected "+(t.v?"'"+t.v+"'":"end of file"),"compile")};
+ const ilist=()=>{ex("{");const a=[];while(!at("}")){a.push(at("{")?ilist():asg());if(!at(","))break;nx()}ex("}");return{t:"list",a}};
+ const decl=ty=>{const items=[],l=peek().l;
+  do{if(at("*"))NOPTR(peek().l);const nm=nx();if(nm.k!=="id")CE(nm.l,"expected a variable name","compile");
+   const dims=[];while(at("[")){nx();dims.push(at("]")?null:asg());ex("]")}if(dims.length)arrN.add(nm.v);
+   let init=null;if(at("=")){nx();init=at("{")?ilist():asg()}items.push({name:nm.v,dims,init,l:nm.l})}while(at(",")&&nx());
+  ex(";");return{t:"decl",ty,items,l}};
+ const block=()=>{ex("{");const s=[];while(!at("}")){if(peek().k==="eof")CE(EOF.l,"missing } at the end of the program","compile");s.push(stmt())}nx();return{t:"block",s}};
+ const stmt=()=>{const t=peek();if(at("{"))return block();
+  if(t.k==="id"){switch(t.v){
+   case"if":{nx();ex("(");const c=asg();ex(")");const a=stmt();let b=null;if(at("else")){nx();b=stmt()}return{t:"if",c,a,b}}
+   case"while":{nx();ex("(");const c=asg();ex(")");return{t:"while",c,b:stmt()}}
+   case"do":{nx();const b=stmt();if(!at("while"))CE(peek().l,"expected 'while' after the do-block","compile");nx();ex("(");const c=asg();ex(")");ex(";");return{t:"do",c,b}}
+   case"for":{nx();ex("(");let i=null;if(isTy())i=decl(ptype());else{if(!at(";"))i={t:"expr",e:asg()};ex(";")}
+    const c=at(";")?null:asg();ex(";");let u=at(")")?null:asg();while(u&&at(",")){nx();u={t:"seq",a:u,b:asg()}}ex(")");return{t:"for",i,c,u,b:stmt()}}
+   case"return":{nx();const e=at(";")?null:asg();ex(";");return{t:"ret",e}}
+   case"break":nx();ex(";");return{t:"brk"};
+   case"continue":nx();ex(";");return{t:"cnt"};
+   case"switch":{nx();ex("(");const e=asg();ex(")");ex("{");const cs=[];
+    while(!at("}")){let v=null;if(at("case")){nx();v=tern()}else if(at("default"))nx();else CE(peek().l,"expected case or default","compile");ex(":");const b=[];while(!at("case")&&!at("default")&&!at("}")){if(peek().k==="eof")CE(EOF.l,"missing }","compile");b.push(stmt())}cs.push({v,b})}nx();return{t:"switch",e,cs}}}}
+  if(isTy())return decl(ptype());if(at(";")){nx();return{t:"nop"}}
+  const e=asg();ex(";");return{t:"expr",e}};
+ const funcs={},globals=[];
+ while(peek().k!=="eof"){if(!isTy())CE(peek().l,"expected a function or a declaration here","compile");const ty=ptype(),nm=peek();
+  if(T[p+1]&&T[p+1].v==="("&&nm.k==="id"){nx();nx();const ps=[];if(at("void")&&T[p+1]&&T[p+1].v===")")nx();
+   while(!at(")")){const pt=ptype();if(at("*"))NOPTR(peek().l);const pn=nx();let arr=false;while(at("[")){nx();if(!at("]"))asg();ex("]");arr=true}ps.push({n:pn.v,ty:pt,arr});if(!at(","))break;nx()}
+   ex(")");funcs[nm.v]={ps,ty,b:block(),l:nm.l}}else globals.push(decl(ty))}
+ if(!funcs.main)CE(1,"your program needs a main() function","compile");
+ if(ioLine&&!hasIO)CE(ioLine,"add #include <stdio.h> at the top of your program","compile");
+ for(const [n,l] of badScan)if(!arrN.has(n))CE(l,"scanf needs & before the variable, like &"+n+".","compile");
+ /* ---- run ---- */
+ const tick=()=>{if(++steps>1500000)CE(cl,"The program ran too long. Is there an infinite loop?")};
+ const truthy=v=>val(v)!==0,num=v=>{if(Array.isArray(v))CE(cl,"expected a number but found a string or array");return val(v)};
+ let scopes=[new Map()];
+ const look=(n,l)=>{for(let i=scopes.length-1;i>=0;i--)if(scopes[i].has(n))return scopes[i].get(n);CE(l,"'"+n+"' was not declared. Declare it first, like int "+n+";")};
+ const co=(ty,v)=>{const x=num(v);switch(ty){case"f":return new F(x);case"i32":return Math.trunc(x)|0;case"u32":return Math.trunc(x)>>>0;case"c":return(Math.trunc(x)<<24)>>24;case"i64":return Math.trunc(x);default:return v}};
+ const zero=ty=>ty==="f"?new F(0):0;
+ const mk=(d,k,ty)=>{const a=[];a.et=d.length-1>k?"arr":ty;for(let i=0;i<d[k];i++)a.push(d.length-1>k?mk(d,k+1,ty):zero(ty));return a};
+ const aStr=a=>{let s="";for(let i=0;i<a.length&&val(a[i])!==0;i++)s+=String.fromCharCode(val(a[i]));return s};
+ const sArr=s=>{const a=[...s].map(c=>c.charCodeAt(0));a.push(0);a.et="c";return a};
+ const fill=(a,init,l)=>{if(init.t==="str"){if(init.v.length>=a.length)CE(l,"the text is too long for this array");for(let i=0;i<init.v.length;i++)a[i]=init.v.charCodeAt(i);return}
+  if(init.t!=="list")CE(l,"an array needs { } values");if(init.a.length>a.length)CE(l,"too many values for this array");init.a.forEach((x,i)=>{if(x.t==="list")fill(a[i],x,l);else a[i]=co(a.et,ev(x))})};
+ const put=s=>{out+=s;if(out.length>20000)CE(cl,"Too much output")};
+ const chkI=(a,i,l)=>{if(!Array.isArray(a))CE(l,"this is not an array");if(i<0||i>=a.length)CE(l,"index "+i+" is outside the array (valid: 0 to "+(a.length-1)+"). C would not stop you, but this is a bug.")};
+ const store=(n,v)=>{if(n.t==="var"){const c=look(n.name,n.l);if(c.ty==="arr")CE(n.l,"you can’t assign to a whole array; use strcpy or a loop");c.v=co(c.ty,v);return c.v}
+  const a=ev(n.a),i=num(ev(n.i));chkI(a,i,n.l);if(a.et==="arr")CE(n.l,"use two indexes, like m[i][j]");a[i]=co(a.et,v);return a[i]};
+ const binop=(op,a,b,l)=>{const x=num(a),y=num(b),fl=isF(a)||isF(b);
+  switch(op){case"+":return fl?new F(x+y):x+y;case"-":return fl?new F(x-y):x-y;case"*":return fl?new F(x*y):x*y;
+   case"/":if(fl)return new F(x/y);if(y===0)CE(l,"division by zero");return Math.trunc(x/y);
+   case"%":if(fl)CE(l,"% works on whole numbers only");if(y===0)CE(l,"division by zero");return x%y;
+   case"<":return x<y?1:0;case">":return x>y?1:0;case"<=":return x<=y?1:0;case">=":return x>=y?1:0;case"==":return x===y?1:0;case"!=":return x!==y?1:0;
+   case"&":return x&y;case"|":return x|y;case"^":return x^y;case"<<":return x<<y;case">>":return x>>y}};
+ const fmt=(f,args,l)=>{let k=0;return f.replace(/%([-+ 0#]*)(\d+)?(?:\.(\d+))?(hh|h|ll|l|z)?([diuxXocsfeEgG%])/g,(mm,fl,w,pr,len,c)=>{
+  if(c==="%")return"%";if(k>=args.length)CE(l,"printf has more % than values");const a=args[k++];let s,x;
+  if(c==="s"){if(!Array.isArray(a))CE(l,"%s needs a string");s=aStr(a)}
+  else{x=num(a);const t=Math.trunc(x);
+   if(c==="d"||c==="i")s=String(len&&/l/.test(len)?t:t|0);else if(c==="u")s=String(t>>>0);else if(c==="x")s=(t>>>0).toString(16);else if(c==="X")s=(t>>>0).toString(16).toUpperCase();
+   else if(c==="o")s=(t>>>0).toString(8);else if(c==="c")s=String.fromCharCode(t);else if(c==="f")s=x.toFixed(pr===undefined?6:+pr);
+   else if(c==="e"||c==="E"){s=x.toExponential(pr===undefined?6:+pr).replace(/e([+-])(\d)$/,"e$10$2");if(c==="E")s=s.toUpperCase()}
+   else s=String(+x.toPrecision(pr===undefined?6:(+pr||1)));
+   if(fl.includes("+")&&x>=0&&"difeEgG".includes(c))s="+"+s}
+  if(w&&s.length<+w){if(fl.includes("-"))s=s.padEnd(+w);else if(fl.includes("0")&&c!=="s"&&c!=="c"){const ng=/^[-+]/.test(s);s=(ng?s[0]:"")+s.slice(ng?1:0).padStart(+w-(ng?1:0),"0")}else s=s.padStart(+w)}
+  return s})};
+ const scan=n=>{const A=n.a;if(!A.length||A[0].t!=="str")CE(n.l,'scanf needs a format like "%d"');
+  const specs=[...A[0].v.matchAll(/%\*?(\d+)?(?:hh|h|ll|l)?([dfcsiu])/g)];let cnt=0;
+  for(let k=0;k<specs.length;k++){const c=specs[k][2],t=A[k+1];if(!t)CE(n.l,"scanf has more % than variables");const rest=input.slice(ip);let mm;
+   if(c==="c")mm=rest.match(/^\s*(\S)/);else if(c==="s")mm=rest.match(/^\s*(\S+)/);else if(c==="f")mm=rest.match(/^\s*([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)/);else mm=rest.match(/^\s*([+-]?\d+)/);
+   if(!mm)return cnt||-1;ip+=mm[0].length;
+   if(c==="s"){const arr=ev(t.t==="addr"?t.a:t),s=mm[1];if(!Array.isArray(arr)||s.length>=arr.length)CE(n.l,"the input is too long for the string buffer");for(let i=0;i<s.length;i++)arr[i]=s.charCodeAt(i);arr[s.length]=0}
+   else{if(t.t!=="addr")CE(n.l,"scanf needs & before the variable, like &x.");store(t.a,c==="c"?mm[1].charCodeAt(0):c==="f"?new F(parseFloat(mm[1])):parseInt(mm[1],10))}cnt++}
+  return cnt};
+ const builtin=n=>{const A=n.a,nm=n.name,argv=()=>A.map(x=>x.t==="str"?sArr(x.v):ev(x));
+  switch(nm){
+   case"printf":{if(!A.length)CE(n.l,"printf needs some text to print");const f=A[0].t==="str"?A[0].v:aStr(ev(A[0])),r=fmt(f,A.slice(1).map(x=>x.t==="str"?sArr(x.v):ev(x)),n.l);put(r);return r.length}
+   case"puts":{put(aStr(argv()[0])+"\n");return 1}
+   case"putchar":{const c=num(ev(A[0]));put(String.fromCharCode(c));return c}
+   case"scanf":return scan(n);
+   case"strlen":return aStr(argv()[0]).length;
+   case"strcmp":{const [a,b]=argv().map(aStr);return a<b?-1:a>b?1:0}
+   case"strcpy":case"strcat":{const [d,s]=argv(),sv=aStr(s),st=nm==="strcat"?aStr(d).length:0;for(let i=0;i<=sv.length;i++){if(st+i>=d.length)CE(n.l,nm+" overflows the buffer");d[st+i]=i<sv.length?sv.charCodeAt(i):0}return 0}
+   case"abs":return Math.abs(num(ev(A[0]))|0);case"fabs":return new F(Math.abs(num(ev(A[0]))));
+   case"sqrt":return new F(Math.sqrt(num(ev(A[0]))));case"pow":return new F(Math.pow(num(ev(A[0])),num(ev(A[1]))));
+   case"floor":return new F(Math.floor(num(ev(A[0]))));case"ceil":return new F(Math.ceil(num(ev(A[0]))));
+   case"toupper":{const c=num(ev(A[0]));return c>=97&&c<=122?c-32:c}case"tolower":{const c=num(ev(A[0]));return c>=65&&c<=90?c+32:c}
+   case"exit":{const e=new Error("exit");e.exit=1;throw e}}
+  CE(n.l,"function '"+nm+"' is not defined (or not supported in this browser runner)")};
+ const call=n=>{const f=funcs[n.name];if(!f)return builtin(n);
+  if(n.a.length!==f.ps.length)CE(n.l,n.name+" expects "+f.ps.length+" value(s) but got "+n.a.length);
+  if(++depth>1500)CE(n.l,"Stack overflow: the recursion never stops (missing base case?)");
+  const args=n.a.map(x=>ev(x)),old=scopes;scopes=[old[0],new Map()];
+  f.ps.forEach((q,i)=>scopes[1].set(q.n,q.arr?{ty:"arr",v:args[i]}:{ty:q.ty,v:co(q.ty,args[i])}));
+  let r;try{r=ex1(f.b)}finally{scopes=old;depth--}
+  return f.ty==="v"?0:co(f.ty,r&&r.s==="r"?r.v:0)};
+ function ev(n){tick();if(n.l)cl=n.l;
+  switch(n.t){
+   case"num":return n.v;case"str":return sArr(n.v);
+   case"var":return look(n.name,n.l).v;
+   case"idx":{const a=ev(n.a),i=num(ev(n.i));chkI(a,i,n.l);return a[i]}
+   case"asg":return store(n.a,n.op==="="?ev(n.b):binop(n.op[0],ev(n.a),ev(n.b),n.l));
+   case"bin":if(n.op==="&&")return truthy(ev(n.a))&&truthy(ev(n.b))?1:0;if(n.op==="||")return truthy(ev(n.a))||truthy(ev(n.b))?1:0;return binop(n.op,ev(n.a),ev(n.b),n.l);
+   case"un":{const x=ev(n.a);switch(n.op){case"!":return truthy(x)?0:1;case"-":return isF(x)?new F(-x.f):-num(x);case"+":return x;case"~":return ~num(x)}return 0}
+   case"cast":return co(n.ty,ev(n.a));
+   case"cond":return truthy(ev(n.c))?ev(n.a):ev(n.b);
+   case"pre":case"post":{const old=ev(n.a),st=store(n.a,binop(n.op[0],old,1,n.l));return n.t==="pre"?st:old}
+   case"seq":ev(n.a);return ev(n.b);
+   case"addr":CE(n.l,"& is only supported inside scanf in this browser runner");
+   case"call":return call(n)}}
+ function ex1(s){tick();
+  switch(s.t){
+   case"block":{scopes.push(new Map());try{for(const x of s.s){const r=ex1(x);if(r)return r}}finally{scopes.pop()}return}
+   case"decl":{const sc=scopes[scopes.length-1];for(const it of s.items){
+    if(it.dims.length){const d=it.dims.map(x=>x?num(ev(x)):null);if(d[0]===null){if(it.init&&it.init.t==="str")d[0]=it.init.v.length+1;else if(it.init&&it.init.t==="list")d[0]=it.init.a.length;else CE(it.l,"the array needs a size")}
+     if(d.some(x=>!(x>0)))CE(it.l,"array sizes must be positive numbers");const a=mk(d,0,s.ty);if(it.init)fill(a,it.init,it.l);sc.set(it.name,{ty:"arr",v:a})}
+    else sc.set(it.name,{ty:s.ty,v:it.init?co(s.ty,ev(it.init)):zero(s.ty)})}return}
+   case"expr":ev(s.e);return;
+   case"if":return truthy(ev(s.c))?ex1(s.a):(s.b?ex1(s.b):undefined);
+   case"while":while(truthy(ev(s.c))){const r=ex1(s.b);if(r){if(r.s==="b")break;if(r.s==="r")return r}}return;
+   case"do":do{const r=ex1(s.b);if(r){if(r.s==="b")break;if(r.s==="r")return r}}while(truthy(ev(s.c)));return;
+   case"for":{scopes.push(new Map());try{if(s.i)ex1(s.i);while(!s.c||truthy(ev(s.c))){const r=ex1(s.b);if(r){if(r.s==="b")break;if(r.s==="r")return r}if(s.u)ev(s.u)}}finally{scopes.pop()}return}
+   case"ret":return{s:"r",v:s.e?ev(s.e):0};
+   case"brk":return{s:"b"};case"cnt":return{s:"c"};
+   case"switch":{const v=num(ev(s.e));let i=s.cs.findIndex(c=>c.v&&num(ev(c.v))===v);if(i<0)i=s.cs.findIndex(c=>!c.v);if(i<0)return;
+    for(let j=i;j<s.cs.length;j++)for(const x of s.cs[j].b){const r=ex1(x);if(r){if(r.s==="b")return;return r}}return}
+   case"nop":return}}
+ for(const g of globals)ex1(g);
+ call({name:"main",a:[],l:funcs.main.l});
+ return{out,err:null};
+ }catch(e){
+  if(e.exit)return{out,err:null};
+  if(e.line!==undefined)return{out,err:{line:e.line,msg:e.message,kind:e.kind||"runtime"}};
+  return{out,err:{line:0,msg:"Internal error: "+e.message,kind:"internal"}}}}
+const norm=s=>String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").trim();
 const EX=[
-{t:"Hello, C!",d:"Print exactly: Hello, C!",code:"#include <stdio.h>\n\nint main() {\n  // print Hello, C! here\n\n  return 0;\n}",inp:"",exp:"Hello, C!",h:["printf shows text on screen.","Put the text inside double quotes, then end the line with ;","printf(\"Hello, C!\\n\");"]},
-{t:"Add two numbers",d:"Read two integers and print Sum = followed by the total.",code:"#include <stdio.h>\n\nint main() {\n  int a, b, sum;\n  // read a and b, then print the sum\n\n  return 0;\n}",inp:"10 20",exp:"Sum = 30",h:["scanf reads numbers into variables.","scanf(\"%d %d\", &a, &b); then sum = a + b;","printf(\"Sum = %d\", sum);"]},
-{t:"Fix the code",d:"This program has 2 mistakes. Fix them so it prints Age = 20.",code:"#include <stdio.h>\n\nint main() {\n  int age\n  scanf(\"%d\", age);\n  printf(\"Age = %d\", age);\n  return 0;\n}",inp:"20",exp:"Age = 20",h:["Read the error message: it names a line.","Every statement ends with ;","scanf needs the address: &age"]}];
-function chk(code){const er=[];if(!/#include\s*<stdio\.h>/.test(code))er.push("Add #include <stdio.h> at the top.");if(!/main\s*\(/.test(code))er.push("Your program needs a main() function.");
- code.split("\n").forEach((l,i)=>{const t=l.trim(),n="Line "+(i+1)+": ";if(/^(int|float|double|char)\s+[^;{()]+$/.test(t)||/^(printf|scanf|return)\b.*[^;{]$/.test(t))er.push(n+"missing ; at the end.");
-  const m=t.match(/scanf\s*\(\s*"[^"]*"\s*,(.*)\)/);if(m&&m[1].split(",").some(a=>!/^\s*&/.test(a)))er.push(n+"scanf needs & before the variable, like &age.")});return er}
-function exec(code,inp){const env={},nums=inp.split(/\s+/).filter(Boolean).map(Number);let ni=0,out="";
- const c=code.replace(/\/\/.*$/gm,"").replace(/\/\*[\s\S]*?\*\//g,"");
- const ev=e=>{const s=e.replace(/[a-zA-Z_]\w*/g,v=>v in env?env[v]:"NaN");if(!/^[\d\s+\-*/%().NaN]+$/.test(s))throw 0;return Function("return "+s)()};
- const re=/scanf\s*\(\s*"[^"]*"\s*,([^;]*)\)\s*;|printf\s*\(\s*"((?:[^"\\]|\\.)*)"\s*(?:,([^;]*))?\)\s*;|\b(?:int|float|double)?\s*([a-zA-Z_]\w*)\s*=\s*([^;=]+);/g;let m;
- while((m=re.exec(c))){if(m[1]!==undefined)m[1].split(",").forEach(a=>{env[a.replace(/[&\s]/g,"")]=nums[ni++]});
-  else if(m[2]!==undefined){const ar=m[3]?m[3].split(",").map(a=>ev(a.trim())):[];let k=0;out+=m[2].replace(/%[di]|%f/g,s=>{const v=ar[k++];return s==="%f"?(+v).toFixed(6):String(Math.trunc(v))}).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\"/g,'"')}
-  else env[m[4]]=ev(m[5])}return out}
-function lab(){S.lab=S.lab||{};let k=0,hi=0;const codes=EX.map(e=>e.code);
+{t:"Hello, C!",d:"Print exactly: Hello, C!",code:"#include <stdio.h>\n\nint main() {\n  // print Hello, C! here\n\n  return 0;\n}",cases:[["","Hello, C!"]],h:["printf shows text on screen.","Put the text inside double quotes and end the line with ;","printf(\"Hello, C!\\n\");"],sol:'#include <stdio.h>\nint main(){printf("Hello, C!\\n");return 0;}'},
+{t:"Add two numbers",d:"Read two integers and print Sum = followed by the total.",code:"#include <stdio.h>\n\nint main() {\n  int a, b, sum;\n  // read a and b, then print the sum\n\n  return 0;\n}",cases:[["10 20","Sum = 30"],["5 7","Sum = 12"],["-3 3","Sum = 0"]],h:["scanf reads numbers into variables.","scanf(\"%d %d\", &a, &b); then sum = a + b;","printf(\"Sum = %d\", sum);"],sol:'#include <stdio.h>\nint main(){int a,b,sum;scanf("%d %d",&a,&b);sum=a+b;printf("Sum = %d",sum);return 0;}'},
+{t:"Fix the code",d:"This program has 2 mistakes. Fix them so it prints Age = 20.",code:"#include <stdio.h>\n\nint main() {\n  int age\n  scanf(\"%d\", age);\n  printf(\"Age = %d\", age);\n  return 0;\n}",cases:[["20","Age = 20"],["7","Age = 7"]],h:["Read the error message: it names a line.","Every statement ends with ;","scanf needs the address: &age"],sol:'#include <stdio.h>\nint main(){int age;scanf("%d",&age);printf("Age = %d",age);return 0;}'},
+{t:"Even or odd",d:"Read a number and print Even or Odd.",code:"#include <stdio.h>\n\nint main() {\n  int n;\n  scanf(\"%d\", &n);\n  // print Even or Odd\n\n  return 0;\n}",cases:[["7","Odd"],["10","Even"],["0","Even"]],h:["A number is even when n % 2 is 0.","Use if (n % 2 == 0) ... else ...","if (n % 2 == 0) printf(\"Even\"); else printf(\"Odd\");"],sol:'#include <stdio.h>\nint main(){int n;scanf("%d",&n);if(n%2==0)printf("Even");else printf("Odd");return 0;}'},
+{t:"Sum of 1 to N",d:"Read N and print Sum = followed by 1 + 2 + ... + N.",code:"#include <stdio.h>\n\nint main() {\n  int n, i, sum = 0;\n  scanf(\"%d\", &n);\n  // add 1 to n using a loop\n\n  return 0;\n}",cases:[["10","Sum = 55"],["1","Sum = 1"],["100","Sum = 5050"]],h:["Use a for loop from 1 to n.","for (i = 1; i <= n; i++) sum += i;","printf(\"Sum = %d\", sum);"],sol:'#include <stdio.h>\nint main(){int n,i,sum=0;scanf("%d",&n);for(i=1;i<=n;i++)sum+=i;printf("Sum = %d",sum);return 0;}'},
+{t:"Largest in array",d:"Read 5 numbers into an array and print Largest = followed by the biggest.",code:"#include <stdio.h>\n\nint main() {\n  int a[5], i, max;\n  for (i = 0; i < 5; i++) scanf(\"%d\", &a[i]);\n  // find the largest\n\n  return 0;\n}",cases:[["10 4 9 22 7","Largest = 22"],["1 2 3 4 5","Largest = 5"],["-5 -2 -9 -1 -7","Largest = -1"]],h:["Start with max = a[0].","Loop and update max when a[i] > max.","max = a[0]; for (i = 1; i < 5; i++) if (a[i] > max) max = a[i];"],sol:'#include <stdio.h>\nint main(){int a[5],i,max;for(i=0;i<5;i++)scanf("%d",&a[i]);max=a[0];for(i=1;i<5;i++)if(a[i]>max)max=a[i];printf("Largest = %d",max);return 0;}'},
+{t:"Factorial function",d:"Write factorial(n) and print Factorial = followed by n!.",code:"#include <stdio.h>\n\nint factorial(int n) {\n  // return n!\n  return 1;\n}\n\nint main() {\n  int n;\n  scanf(\"%d\", &n);\n  printf(\"Factorial = %d\", factorial(n));\n  return 0;\n}",cases:[["5","Factorial = 120"],["0","Factorial = 1"],["7","Factorial = 5040"]],h:["0! and 1! are both 1.","n! = n * (n-1)!, or multiply in a loop.","if (n <= 1) return 1; return n * factorial(n - 1);"],sol:'#include <stdio.h>\nint factorial(int n){if(n<=1)return 1;return n*factorial(n-1);}\nint main(){int n;scanf("%d",&n);printf("Factorial = %d",factorial(n));return 0;}'}];
+function selfTest(){const bad=[];
+ EX.forEach((e,i)=>{try{if(e.cases.some(([inp,exp])=>{const r=runC(e.sol,inp);return r.err||norm(r.out)!==norm(exp)}))bad.push("exercise "+(i+1))}catch(x){bad.push("exercise "+(i+1))}});
+ const chk=(n,src,inp,pred)=>{try{const r=runC(src,inp);if(!pred(r))bad.push(n)}catch(x){bad.push(n)}};
+ chk("missing ;",EX[2].code,"20",r=>r.err&&r.err.kind==="compile"&&r.err.line===4);
+ chk("missing &",'#include <stdio.h>\nint main(){int a;scanf("%d",a);return 0;}',"1",r=>r.err&&/&/.test(r.err.msg));
+ chk("curly quotes",'#include <stdio.h>\nint main(){printf(\u201cHi\u201d);return 0;}',"",r=>!r.err&&r.out==="Hi");
+ chk("infinite loop",'int main(){while(1){}return 0;}',"",r=>r.err&&/too long/.test(r.err.msg));
+ chk("float math",'#include <stdio.h>\nint main(){float a=7;printf("%.2f %d",a/2,7/2);return 0;}',"",r=>!r.err&&r.out==="3.50 3");
+ chk("switch+string",'#include <stdio.h>\nint main(){char s[10]="hey";int x=2;switch(x){case 1:printf("a");break;case 2:printf("%s!",s);break;}return 0;}',"",r=>!r.err&&r.out==="hey!");
+ return bad}
+
+function lab(){S.lab=S.lab||{};let k=0,hi=0;const codes=EX.map(e=>e.code),ins=EX.map(e=>e.cases[0][0]);
  const draw=()=>{const e=EX[k];V.innerHTML=`<h2>Training lab</h2><div class="row">${EX.map((x,i)=>`<button class="ghost ${i===k?"on":""}" data-k="${i}">${S.lab[i]?"✓ ":""}${i+1}. ${x.t}</button>`).join("")}</div>
- <div class="card"><b>${e.t}</b><p>${e.d}</p><textarea class="code" id="cd" spellcheck="false" aria-label="C code">${esc(codes[k])}</textarea>
- <div class="row"><label class="hint" for="in">Input</label><input type="text" id="in" value="${e.inp}"></div>
+ <div class="card"><b>${e.t}</b><p>${e.d}</p><textarea class="code" id="cd" wrap="off" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="C code">${esc(codes[k])}</textarea>
+ <div class="row"><label class="hint" for="in">Input</label><input type="text" id="in" value="${esc(ins[k])}" autocapitalize="off" autocorrect="off" autocomplete="off"></div>
  <div class="row"><button class="b3" id="run">Run</button><button class="ghost" id="hint">Hint</button><button class="ghost" id="rs">Reset</button></div>
- <pre class="out" id="out">Output appears here.</pre><p class="hint" id="hm"></p></div>
- <p class="hint">Browser check mode: handles variables, scanf, printf and + - * / %. Loops and if need a real compiler (Judge0).</p>`;
-  V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{codes[k]=$("#cd").value;k=+b.dataset.k;hi=0;draw()});
-  $("#rs").onclick=()=>{codes[k]=e.code;draw()};
+ <pre class="out" id="out">Press Run to see your output here.</pre><p class="hint" id="hm"></p></div>
+ <p class="hint">Browser C runner: variables, if, loops, switch, arrays, strings, functions, scanf and printf. Pointers and structs are in the Memory lab.</p>`;
+  V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{codes[k]=$("#cd").value;ins[k]=$("#in").value;k=+b.dataset.k;hi=0;draw()});
+  $("#rs").onclick=()=>{codes[k]=e.code;ins[k]=e.cases[0][0];draw()};
   $("#hint").onclick=()=>{$("#hm").textContent="Hint "+(hi+1)+": "+e.h[Math.min(hi++,2)]};
-  $("#run").onclick=()=>{const code=$("#cd").value,o=$("#out");codes[k]=code;$("#hm").textContent="";const er=chk(code);
-   if(er.length){o.className="out err";o.textContent="Compile error\n"+er.join("\n");return}
-   let out;try{out=exec(code,$("#in").value)}catch(x){o.className="out err";o.textContent="This line can’t run in browser mode yet.";return}
-   const ok=out.trim()===e.exp;o.className="out "+(ok?"ok":"err");o.textContent=out||"(no output)";$("#hm").textContent=ok?"Correct!":"Not matching yet. Check your code and try again.";
-   if(ok&&!S.lab[k]){S.lab[k]=1;S.xp+=30;save();$("#hm").textContent="Correct! +30 XP"+(k===0?" · Badge unlocked: First C Program":"")}}};
+  $("#run").onclick=()=>{const o=$("#out"),hm=$("#hm");
+   try{const code=$("#cd").value;codes[k]=code;ins[k]=$("#in").value;hm.textContent="";
+    const r=runC(code,ins[k]);
+    if(r.err){o.className="out err";o.textContent=(r.out?r.out+"\n":"")+(r.err.kind==="compile"?"Compile error":"Error")+(r.err.line?" on line "+r.err.line:"")+": "+r.err.msg;
+     hm.textContent=r.err.kind==="compile"?"Fix this error, then press Run again.":"";o.scrollIntoView({block:"nearest",behavior:"smooth"});return}
+    o.className="out";o.textContent=r.out||"(Your program printed nothing. Did you add printf?)";
+    let pass=0;for(const [ci,exp] of e.cases){const q=runC(code,ci);if(!q.err&&norm(q.out)===norm(exp))pass++}
+    if(pass===e.cases.length){hm.textContent="Correct! "+(e.cases.length>1?"All "+e.cases.length+" tests passed.":"");
+     if(!S.lab[k]){S.lab[k]=1;S.xp+=30;save();hm.textContent+=" +30 XP"+(k===0?" · Badge unlocked: First C Program":"")}}
+    else hm.textContent=pass?"Passed "+pass+" of "+e.cases.length+" tests. It works for some inputs but fails on others: check special cases.":"Not matching yet. Check your code and try again.";
+    o.scrollIntoView({block:"nearest",behavior:"smooth"})
+   }catch(x){console.error(x);o.className="out err";o.textContent="Internal error: "+x.message+"\nPlease tell Gokul.";}};
+ };
  draw()}
+{const bad=selfTest();if(bad.length){console.error("CForge lab self-test failed:",bad);const b=document.createElement("div");b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99;background:#ff3b5c;color:#fff;padding:8px 12px;font:13px sans-serif";b.textContent="Lab self-test failed ("+bad.join(", ")+"). Please tell Gokul.";document.body.appendChild(b)}}
 /* modules */
 const MD=[["Introduction to C",1],["Variables & data types",2],["Operators",4],["Input & output",3],["If, else & switch",5],["Loops",7],["Arrays",11],["Strings",13],["Functions",9],["Pointers",16],["Structures & unions",23],["File handling",28],["Mini projects",10]];
 function modules(){V.innerHTML="<h2>12 modules + projects</h2>"+MD.map((m,i)=>`<a class="card mod" href="#day-${m[1]}" style="margin-bottom:10px"><i>${i+1}</i><span><b>${m[0]}</b><br><span class="chip">Beginner: meaning</span><span class="chip">Intermediate: examples</span><span class="chip">Advanced: problems</span></span></a>`).join("")}

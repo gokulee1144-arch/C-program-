@@ -471,7 +471,7 @@ function runC(src,input){
   return{out,err:{line:0,msg:"Internal error: "+e.message,kind:"internal"}}}}
 const norm=s=>String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").trim();
 const EX=[
-{t:"Hello, C!",d:"Print exactly: Hello, C!",code:"#include <stdio.h>\n\nint main() {\n  // print Hello, C! here\n\n  return 0;\n}",cases:[["","Hello, C!"]],h:["printf shows text on screen.","Put the text inside double quotes and end the line with ;","printf(\"Hello, C!\\n\");"],sol:'#include <stdio.h>\nint main(){printf("Hello, C!\\n");return 0;}'},
+{t:"Hello, C!",d:"Print exactly: Hello, C!",code:"#include <stdio.h>\n\nint main() {\n  // Step 1: type your printf line below\n\n  return 0;\n}",cases:[["","Hello, C!"]],h:["printf shows text on screen.","Put the text inside double quotes and end the line with ;","printf(\"Hello, C!\\n\");"],sol:'#include <stdio.h>\nint main(){printf("Hello, C!\\n");return 0;}'},
 {t:"Add two numbers",d:"Read two integers and print Sum = followed by the total.",code:"#include <stdio.h>\n\nint main() {\n  int a, b, sum;\n  // read a and b, then print the sum\n\n  return 0;\n}",cases:[["10 20","Sum = 30"],["5 7","Sum = 12"],["-3 3","Sum = 0"]],h:["scanf reads numbers into variables.","scanf(\"%d %d\", &a, &b); then sum = a + b;","printf(\"Sum = %d\", sum);"],sol:'#include <stdio.h>\nint main(){int a,b,sum;scanf("%d %d",&a,&b);sum=a+b;printf("Sum = %d",sum);return 0;}'},
 {t:"Fix the code",d:"This program has 2 mistakes. Fix them so it prints Age = 20.",code:"#include <stdio.h>\n\nint main() {\n  int age\n  scanf(\"%d\", age);\n  printf(\"Age = %d\", age);\n  return 0;\n}",cases:[["20","Age = 20"],["7","Age = 7"]],h:["Read the error message: it names a line.","Every statement ends with ;","scanf needs the address: &age"],sol:'#include <stdio.h>\nint main(){int age;scanf("%d",&age);printf("Age = %d",age);return 0;}'},
 {t:"Even or odd",d:"Read a number and print Even or Odd.",code:"#include <stdio.h>\n\nint main() {\n  int n;\n  scanf(\"%d\", &n);\n  // print Even or Odd\n\n  return 0;\n}",cases:[["7","Odd"],["10","Even"],["0","Even"]],h:["A number is even when n % 2 is 0.","Use if (n % 2 == 0) ... else ...","if (n % 2 == 0) printf(\"Even\"); else printf(\"Odd\");"],sol:'#include <stdio.h>\nint main(){int n;scanf("%d",&n);if(n%2==0)printf("Even");else printf("Odd");return 0;}'},
@@ -495,7 +495,7 @@ function lab(){S.lab=S.lab||{};let k=0,hi=0;const codes=EX.map(e=>e.code),ins=EX
  <div class="row"><label class="hint" for="in">Input</label><input type="text" id="in" value="${esc(ins[k])}" autocapitalize="off" autocorrect="off" autocomplete="off"></div>
  <div class="row"><button class="b3" id="run">Run</button><button class="ghost" id="hint">Hint</button><button class="ghost" id="rs">Reset</button></div>
  <pre class="out" id="out">Press Run to see your output here.</pre><p class="hint" id="hm"></p></div>
- <p class="hint">Browser C runner: variables, if, loops, switch, arrays, strings, functions, scanf and printf. Pointers and structs are in the Memory lab.</p>`;
+ <p class="hint">Lab version 3 · Browser C runner: variables, if, loops, switch, arrays, strings, functions, scanf and printf. Pointers and structs are in the Memory lab.</p>`;
   V.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{codes[k]=$("#cd").value;ins[k]=$("#in").value;k=+b.dataset.k;hi=0;draw()});
   $("#rs").onclick=()=>{codes[k]=e.code;ins[k]=e.cases[0][0];draw()};
   $("#hint").onclick=()=>{$("#hm").textContent="Hint "+(hi+1)+": "+e.h[Math.min(hi++,2)]};
@@ -504,7 +504,8 @@ function lab(){S.lab=S.lab||{};let k=0,hi=0;const codes=EX.map(e=>e.code),ins=EX
     const r=runC(code,ins[k]);
     if(r.err){o.className="out err";o.textContent=(r.out?r.out+"\n":"")+(r.err.kind==="compile"?"Compile error":"Error")+(r.err.line?" on line "+r.err.line:"")+": "+r.err.msg;
      hm.textContent=r.err.kind==="compile"?"Fix this error, then press Run again.":"";o.scrollIntoView({block:"nearest",behavior:"smooth"});return}
-    o.className="out";o.textContent=r.out||"(Your program printed nothing. Did you add printf?)";
+    o.className="out";o.textContent=r.out||"(nothing printed yet)";
+    if(!r.out){hm.textContent="Your code has nothing to print yet. Add a printf line inside main(), then press Run. Tap Hint if you need help.";o.scrollIntoView({block:"nearest",behavior:"smooth"});return}
     let pass=0;for(const [ci,exp] of e.cases){const q=runC(code,ci);if(!q.err&&norm(q.out)===norm(exp))pass++}
     if(pass===e.cases.length){hm.textContent="Correct! "+(e.cases.length>1?"All "+e.cases.length+" tests passed.":"");
      if(!S.lab[k]){S.lab[k]=1;S.xp+=30;save();hm.textContent+=" +30 XP"+(k===0?" · Badge unlocked: First C Program":"")}}

@@ -167,6 +167,34 @@ html:not([data-theme=light]) body{background:radial-gradient(900px 520px at 85% 
 .badge{margin-left:auto;font-size:12px;padding:6px 12px;border:1px solid var(--cy);color:var(--cy);border-radius:8px;text-decoration:none;background:transparent}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--cy);color:#1a0c00;font-weight:700;padding:10px 18px;border-radius:99px;z-index:70;box-shadow:0 8px 30px rgba(255,122,26,.4)}
 [data-theme=light] .ember,[data-theme=light] .act{background:#fff7ef}
+
+/* ---- Profile v2 (Instagram-style) ---- */
+.ph{padding:4px 0 0}.ph-top{display:flex;align-items:center;gap:22px}
+.ring{display:grid;padding:3px;border-radius:50%;background:conic-gradient(#ff7a1a,#ffb347,#ff3b5c,#ff7a1a);flex:none}
+.ring .pav{width:84px;height:84px;border:3px solid var(--bg);font-size:2rem}
+.ph-st{display:flex;flex:1;justify-content:space-around;text-align:center}.ph-st b{display:block;font:700 1.25rem var(--ui)}.ph-st span{font-size:13px;color:var(--mute)}
+.ph-nm{margin:12px 0 10px}.ph-nm p{font-size:14px;margin-top:4px;max-width:60ch}.vf{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--cy);color:#1a0c00;font-size:10px;font-weight:700;vertical-align:2px}
+.ph-btn{display:flex;gap:8px}.ph-btn>*{flex:1;min-height:40px;border-radius:10px;font-weight:600;font-size:14px}.ph-btn .b3{box-shadow:none;padding:0;color:#1a0c00}.ph-btn .b3:hover,.ph-btn .b3:active{transform:none;box-shadow:none}
+.hl{display:flex;gap:16px;overflow-x:auto;padding:16px 2px 6px}.hl a{display:grid;gap:6px;justify-items:center;text-decoration:none;color:var(--mute);font-size:12px;flex:none}
+.hl i{width:62px;height:62px;border-radius:50%;border:1.5px solid var(--line);background:var(--panel);display:grid;place-items:center;font-size:24px;font-style:normal}.hl a:hover i{border-color:var(--cy)}
+.tabs{display:flex;border-top:1px solid var(--line);margin-top:12px;position:sticky;top:calc(61px + env(safe-area-inset-top,0px));background:var(--bg);z-index:5}
+.tabs button{flex:1;display:grid;justify-items:center;gap:2px;padding:10px 0 8px;background:none;border:0;border-bottom:2px solid transparent;color:var(--mute);font-size:11px}
+.tabs button.on{color:var(--ink);border-color:var(--cy)}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:3px}
+.pg a{aspect-ratio:1;display:grid;place-content:center;text-align:center;text-decoration:none;background:var(--panel);color:var(--mute);font:700 1.3rem var(--mono);position:relative}
+.pg a small{font:500 10px var(--ui);display:block;max-width:90%;margin:2px auto 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg a.done{color:var(--cy);background:rgba(255,122,26,.12)}.pg a.done::after{content:"✓";position:absolute;top:6px;right:8px;font-size:12px}.pg a.cur{outline:2px solid var(--or);outline-offset:-2px;color:var(--or)}
+.pc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.pc header{display:flex;gap:10px;align-items:center}.pc header div{flex:1;min-width:0}.pc header b{display:block;font-size:14px}.pc header small{color:var(--mute);font-size:12px}
+.pc p{margin:10px 0;white-space:pre-wrap;overflow-wrap:anywhere}.pc footer{display:flex;gap:6px}.pc footer button{display:flex;gap:6px;align-items:center;min-height:40px;padding:0 10px;background:none;border:0;border-radius:10px;color:var(--mute)}
+.pc footer button.on{color:var(--rd)}.pc footer button[data-bm]{margin-left:auto}.pc footer button[data-bm].on{color:var(--cy)}.pc footer button.on svg{fill:currentColor}
+.pc .x{min-height:32px;padding:4px 10px;font-size:12px}
+.pc.cmp textarea,.srch input,.fld select,.pc.cmp select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit}
+.pc.cmp select{width:auto}.pc.cmp textarea{margin-top:6px;resize:vertical}
+.srch input{padding:12px 14px;margin:14px 0 4px}.srch input:focus,.sq input:focus,.pc.cmp textarea:focus{outline:0;border-color:var(--cy);box-shadow:0 0 0 3px rgba(255,122,26,.22)}
+.pr2{display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.pr2>div{flex:1;min-width:0}.pr2 b{display:block}.pr2 small{color:var(--mute)}.pr2 p{margin:2px 0 0}
+.pr2 .btns{display:flex;gap:6px;flex-direction:column}.pr2 .btns button{min-height:36px;padding:0 14px;border-radius:10px}.pr2 .btns .b3{box-shadow:none;padding:0 14px;color:#1a0c00}.pr2 .btns .b3:hover,.pr2 .btns .b3:active{transform:none;box-shadow:none}
+.sq input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;color:var(--ink);font:inherit;margin:12px 0 4px}
 </style>
 </head>
 <body>
@@ -259,6 +287,7 @@ function route(){
   const h=(location.hash||"#home").slice(1);
   document.querySelectorAll("#dlist a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+(h.startsWith("day")?"roadmap":h)));
   if(h.startsWith("day-")){pause();return lesson(+h.slice(4)||1)}
+  if(h.startsWith("u-")){window._ptab="people";window._pv=h.slice(2);return profile()}window._pv=null;
   ({home,roadmap,memlab,guru,lab,modules,exam,profile}[h]||home)();window.scrollTo(0,0)}
 addEventListener("hashchange",route);
 function home(){const n=doneN(),nd=nextDay();
@@ -661,16 +690,17 @@ function emberCard(){const{n}=me(),f=n.split(" ")[0],nd=nextDay();
  <div class="bub">I’m stuck on pointers. Should I skip them?</div>
  <p class="coach">No need, ${esc(f)}. A pointer is just an address. Your streak is <em class="it">${S.streak?"still alive":"ready to start"}</em>.</p>
  <div class="act"><div><b>Two tweaks to keep your pace</b><br><small class="hint">Memory lab, 5 min · Day ${nd}: ${esc(T[nd-1])}</small></div><a href="#memlab"><button class="b3">Open memory lab</button></a></div></div>`}
-function profile(){const tab=window._pt||"account",L=[["GENERAL"],["account","👤","Account"],["learn","📈","Learning"],["lang","🌐","Language"],["SYSTEM"],["look","🎨","Appearance"],["about","ℹ️","About"]];
- V.innerHTML=`<h2>Profile & settings</h2><p class="hint">Manage your details and preferences.</p><div class="pf"><div class="side">${L.map(t=>t.length===1?`<h4>${t[0]}</h4>`:`<button data-t="${t[0]}" class="${t[0]===tab?"on":""}"><span class="ic">${t[1]}</span>${t[2]}</button>`).join("")}</div><div class="pane" id="pane"></div></div>`;
- V.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{window._pt=b.dataset.t;profile()});
- ({account:pAcct,learn:pLearn,lang:pLang,look:pLook,about:pAbout}[tab]||pAcct)($("#pane"))}
+function setg(host){const tab=window._pt||"account",L=[["GENERAL"],["account","👤","Account"],["learn","📈","Learning"],["lang","🌐","Language"],["SYSTEM"],["look","🎨","Appearance"],["about","ℹ️","About"]];
+ host.innerHTML=`<div class="sq"><input type="text" id="sq" placeholder="Search settings" aria-label="Search settings"></div><div class="pf"><div class="side">${L.map(t=>t.length===1?`<h4>${t[0]}</h4>`:`<button data-t="${t[0]}" class="${t[0]===tab?"on":""}"><span class="ic">${t[1]}</span>${t[2]}</button>`).join("")}</div><div class="pane" id="pane"></div></div>`;
+ host.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{window._pt=b.dataset.t;setg(host)});
+ ({account:pAcct,learn:pLearn,lang:pLang,look:pLook,about:pAbout}[tab]||pAcct)($("#pane"));$("#sq").oninput=e=>{const v=e.target.value.toLowerCase();host.querySelectorAll("[data-t]").forEach(b=>b.style.display=b.textContent.toLowerCase().includes(v)?"":"none")}}
 function pAcct(P){const{n,p,u}=me(),dn=(u&&u.displayName||"").split(" ");let pend;
  const fv=p.fn!==undefined?p.fn:dn[0]||"",lv=p.ln!==undefined?p.ln:dn.slice(1).join(" "),ev=p.email!==undefined?p.email:(u&&u.email)||"";
  P.innerHTML=`<div class="sec"><h3>Account</h3><p class="d">Your learning profile${u?" (synced to your cloud account)":" on this device"}.</p>
  <div class="pr"><span id="pp"></span><div><b>Profile picture</b><br><small class="hint">PNG or JPEG under 2 MB</small></div><span class="btns"><button class="ghost" id="up">Upload new picture</button><button class="ghost" id="dl">Delete</button></span></div><input type="file" id="fi" accept="image/png,image/jpeg" hidden></div>
  <div class="sec"><h3>Full name</h3><div class="fld two"><div><label for="fn">First name</label><input id="fn" value="${q(fv)}" maxlength="40"></div><div><label for="ln">Last name</label><input id="ln" value="${q(lv)}" maxlength="40"></div></div></div>
  <div class="sec"><h3>Contact email</h3><p class="d">Used for your certificate and progress emails.</p><div class="fld"><div><label for="em">Email</label><input id="em" type="email" value="${q(ev)}" maxlength="80" autocapitalize="off"><div class="err-t" id="eE"></div></div></div></div>
+ <div class="sec"><h3>Profile ID</h3><p class="d">Other learners find you with this ID.</p><div class="fld two"><div><label for="hid">Unique ID</label><input id="hid" value="${q(p.id||myId())}" maxlength="24" autocapitalize="off"></div><div><label for="vis">Who can see your profile</label><select id="vis"><option value="public">Public</option><option value="followers">Followers only</option><option value="private">Private</option></select></div></div></div>
  <div class="sec"><h3>Short bio</h3><div class="fld"><textarea id="bio" rows="3" maxlength="160" placeholder="Tell others what you are learning">${esc(p.bio||"")}</textarea></div></div>
  <div class="sec"><h3>Connected accounts</h3><p class="d">Manage your sign-in and community links.</p>
  <div class="acct"><span class="ic">G</span><div><b>Google sign-in</b><small>${u?esc(u.email||"Signed in"):"Save your progress to the cloud"}</small></div><button class="badge" id="gs">${u?"Connected":"Connect"}</button></div>
@@ -678,7 +708,7 @@ function pAcct(P){const{n,p,u}=me(),dn=(u&&u.displayName||"").split(" ");let pen
  <div class="acct"><span class="ic">💬</span><div><b>WhatsApp group</b><small>Ask doubts, share projects</small></div><a class="badge" href="${WA}" target="_blank" rel="noopener">Join</a></div></div>
  <div class="sec row" style="justify-content:flex-end"><button class="ghost" id="cn">Cancel</button><button class="b3" id="sv">Save changes</button></div>`;
  const pp=()=>{$("#pp").innerHTML=avh(pend===undefined?p.photo:pend,$("#fn").value||n,0)};pp();$("#fn").oninput=pp;
- $("#up").onclick=()=>$("#fi").click();
+ $("#vis").value=p.vis||"public";$("#up").onclick=()=>$("#fi").click();
  $("#fi").onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>2097152){toast("Picture must be under 2 MB");return}
   const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const s=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);pend=c.toDataURL("image/jpeg",.75);pp()};im.src=r.result};r.readAsDataURL(f)};
  $("#dl").onclick=()=>{pend="";pp()};
@@ -686,7 +716,7 @@ function pAcct(P){const{n,p,u}=me(),dn=(u&&u.displayName||"").split(" ");let pen
  $("#cn").onclick=()=>pAcct(P);
  $("#sv").onclick=()=>{const em=$("#em").value.trim(),er=$("#eE"),b=$("#sv");er.textContent="";if(em&&!/^\S+@\S+\.\S+$/.test(em)){er.textContent="Enter a valid email address.";return}
   b.disabled=true;b.textContent="Saving…";
-  setTimeout(()=>{S.pf={fn:$("#fn").value.trim(),ln:$("#ln").value.trim(),email:em,bio:$("#bio").value.trim(),photo:pend===undefined?(p.photo||""):pend};save();applyMe();b.disabled=false;b.textContent="Save changes";toast("Profile updated ✓")},600)}}
+  setTimeout(()=>{S.pf={fn:$("#fn").value.trim(),ln:$("#ln").value.trim(),email:em,bio:$("#bio").value.trim(),id:($("#hid").value.trim().toLowerCase().replace(/[^a-z0-9_.]/g,"")||myId()),vis:$("#vis").value,photo:pend===undefined?(p.photo||""):pend};save();applyMe();b.disabled=false;b.textContent="Save changes";toast("Profile updated ✓")},600)}}
 function pLearn(P){const n=doneN(),lb=Object.keys(S.lab||{}).length,qa=Object.keys(S.qa||{}).length;
  P.innerHTML=`<div class="sec"><h3>Learning overview</h3><p class="d">Real activity from your lessons and labs.</p><div class="grid"><div class="card stat"><b>${n}/60</b><span>Days done</span></div><div class="card stat"><b>${S.xp}</b><span>XP</span></div><div class="card stat"><b>${S.streak}</b><span>Day streak</span></div><div class="card stat"><b>${lb}/${EX.length}</b><span>Lab exercises</span></div><div class="card stat"><b>${qa}</b><span>Quiz answers right</span></div></div></div>
  <div class="sec"><h3>Reset progress</h3><p class="d">Clears lessons, XP, streak and saved lab work.</p><button class="ghost" id="rp" style="border-color:var(--rd);color:var(--rd)">Reset my progress</button></div>`;
@@ -701,6 +731,47 @@ function pLook(P){const th=document.documentElement.dataset.theme;
  $("#fs").oninput=e=>{S.fs=+e.target.value;document.documentElement.style.setProperty("--fs",S.fs+"px");$("#fsd").textContent=S.fs+" px";save()};
  $("#rm").onclick=()=>{S.rm=!S.rm;document.documentElement.classList.toggle("rm",S.rm);save();pLook(P)}}
 function pAbout(P){P.innerHTML=`<div class="sec"><h3>About CForge</h3><p class="d">Learn C by watching memory move. Built by Gokul, a CSE student learning cybersecurity.</p><div class="row"><button class="ghost" id="ai">Meet Gokul</button><a href="${IG}" target="_blank" rel="noopener"><button class="ghost">Instagram</button></a><a href="${WA}" target="_blank" rel="noopener"><button class="ghost">WhatsApp</button></a></div></div>`;$("#ai").onclick=()=>showIntro(0)}
+
+/* ---- Profile v2: Instagram-style profile, posts, people ---- */
+const ic=d=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC={grid:ic('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>'),posts:ic('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h6"/>'),people:ic('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.5a3 3 0 010 5.6M18 14.3c1.8.8 3 2.6 3 5.7"/>'),settings:ic('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'),heart:ic('<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>'),mark:ic('<path d="M6 3h12v18l-6-4-6 4z"/>')};
+const myId=()=>(S.pf&&S.pf.id)||(me().n.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")||"learner")+"_c";
+const PPL=[{id:"priya_codes",n:"Priya S",bio:"Pointers finally clicked on day 16.",d:22,x:1180,ps:["Drew the stack for swap() on paper. Everything makes sense now.","Day 20 done: stack vs heap."]},{id:"arun_ptr",n:"Arun K",bio:"ECE student learning C for embedded work.",d:35,x:1900,ps:["Linked list insert works, and no leaks in Valgrind."]},{id:"meena_dev",n:"Meena R",bio:"Tamil + code. Teaching my sister C.",d:12,x:640,ps:["Tanglish notes are the best. Loops done!"]},{id:"karthik_sec",n:"Karthik V",bio:"Bug bounty beginner. C before exploits.",d:48,x:2600,ps:["The buffer overflow demo in the memory lab was an eye opener."]}];
+const ago=t=>{const m=Math.floor((Date.now()-t)/6e4);return m<1?"just now":m<60?m+" min ago":m<1440?Math.floor(m/60)+" hours ago":Math.floor(m/1440)+" days ago"};
+const fol=id=>(S.fol||[]).includes(id),bs=(id,i)=>(id.length*3+i*5)%17+4;
+const pcard=o=>{const lk=(S.lk||{})[o.id],bm=(S.bm||{})[o.id];return `<article class="pc"><header>${avh(o.photo||"",o.who,1)}<div><b>${esc(o.who)}</b><small>@${esc(o.uid)} · ${ago(o.ts)}</small></div>${o.own?`<button class="ghost x" data-del="${o.id}">Delete</button>`:""}</header><p>${esc(o.txt)}</p><footer><button data-lk="${o.id}" class="${lk?"on":""}" aria-pressed="${!!lk}" aria-label="Like">${IC.heart}<span>${o.base+(lk?1:0)}</span></button><button data-bm="${o.id}" class="${bm?"on":""}" aria-pressed="${!!bm}" aria-label="Save post">${IC.mark}</button></footer></article>`};
+function bindP(B,re){B.querySelectorAll("[data-lk]").forEach(b=>b.onclick=()=>{S.lk=S.lk||{};S.lk[b.dataset.lk]=!S.lk[b.dataset.lk];save();re()});
+ B.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>{S.bm=S.bm||{};S.bm[b.dataset.bm]=!S.bm[b.dataset.bm];save();re()});
+ B.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{S.posts=(S.posts||[]).filter(x=>x.id!==b.dataset.del);save();re()})}
+function toggleFol(id){S.fol=S.fol||[];S.fol=fol(id)?S.fol.filter(x=>x!==id):S.fol.concat(id);save();const e=$("#fc");if(e)e.textContent=S.fol.length}
+const link=id=>location.origin+location.pathname+"#u-"+id;
+const copyL=id=>{const u=link(id);navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(u).then(()=>toast("Profile link copied"),()=>toast(u)):toast(u)};
+function profile(){const t=window._ptab||"grid",{n,p}=me(),nd=nextDay(),TB=[["grid","Progress"],["posts","Posts"],["people","People"],["settings","Settings"]];
+ V.innerHTML=`<div class="ph"><div class="ph-top"><span class="ring">${avh(p.photo,n,0)}</span><div class="ph-st"><div><b>${doneN()}</b><span>days done</span></div><div><b>${S.xp}</b><span>XP</span></div><div><b id="fc">${(S.fol||[]).length}</b><span>following</span></div></div></div>
+ <div class="ph-nm"><b>${esc(n)}</b> <span class="vf" title="Learner">✓</span><div class="hint">@${esc(myId())}</div><p>${esc(p.bio||"Learning C one pointer at a time.")}</p></div>
+ <div class="ph-btn"><button class="ghost" id="ed">Edit profile</button><button class="ghost" id="shr">Share profile</button></div>
+ <div class="hl">${[["🧪","Lab","#lab"],["🧠","Memory","#memlab"],["📚","Modules","#modules"],["📝","Exam","#exam"],["🤖","Guru","#guru"]].map(h=>`<a href="${h[2]}"><i>${h[0]}</i>${h[1]}</a>`).join("")}</div>
+ <div class="tabs" role="tablist">${TB.map(([k,l])=>`<button role="tab" aria-selected="${k===t}" data-tb="${k}" class="${k===t?"on":""}">${IC[k]}<span>${l}</span></button>`).join("")}</div><div id="tb"></div></div>`;
+ $("#ed").onclick=()=>{window._ptab="settings";window._pt="account";profile()};$("#shr").onclick=()=>copyL(myId());
+ V.querySelectorAll("[data-tb]").forEach(b=>b.onclick=()=>{window._ptab=b.dataset.tb;window._pv=null;profile()});
+ const B=$("#tb");({grid:tGrid,posts:tPosts,people:tPpl,settings:setg}[t]||tGrid)(B)}
+function tGrid(B){const nd=nextDay();B.innerHTML=`<div class="pg">${T.map((x,i)=>`<a href="#day-${i+1}" class="${S.done[i+1]?"done":i+1===nd?"cur":""}" title="${esc(x)}">${i+1}<small>${esc(x)}</small></a>`).join("")}</div>`}
+function feed(){const{n,p}=me(),h=myId();let a=(S.posts||[]).map(x=>({id:x.id,who:n,uid:h,txt:x.t,ts:x.ts,base:0,own:1,photo:p.photo}));
+ PPL.filter(u=>fol(u.id)).forEach(u=>u.ps.forEach((t,i)=>a.push({id:u.id+"-"+i,who:u.n,uid:u.id,txt:t,ts:Date.now()-(i+1)*432e5*(u.d%3+1),base:bs(u.id,i)})));return a.sort((x,y)=>y.ts-x.ts)}
+function tPosts(B){const it=feed(),nd=nextDay();
+ B.innerHTML=`<div class="pc cmp"><label for="pt" class="hint">Share what you learned today</label><textarea id="pt" rows="3" maxlength="280" placeholder="Day ${nd}: ${esc(T[nd-1])}. What clicked?"></textarea><div class="row" style="margin:8px 0 0"><select id="pa" aria-label="Audience"><option>Public</option><option>Followers only</option><option>Private</option></select><button class="b3" id="pb" style="margin-left:auto;padding:9px 20px;box-shadow:none">Post</button></div></div>`+(it.length?it.map(pcard).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet. Share your first win, or follow learners in People.</p>`);
+ $("#pb").onclick=()=>{const v=$("#pt").value.trim();if(!v){toast("Write something first");return}S.posts=S.posts||[];S.posts.unshift({id:"m"+Date.now(),t:v,ts:Date.now(),vis:$("#pa").value});save();toast("Posted ✓");tPosts(B)};
+ bindP(B,()=>tPosts(B))}
+function tPpl(B){const vid=window._pv,u0=vid&&PPL.find(x=>x.id===vid);if(u0)return uview(B,u0);
+ B.innerHTML=`<div class="srch"><input type="text" id="us" placeholder="Search @id, name or interest" aria-label="Search people"></div><div id="ul"></div>`;
+ const draw=()=>{const v=$("#us").value.trim().toLowerCase().replace(/^@/,""),r=PPL.filter(u=>!v||(u.id+" "+u.n+" "+u.bio).toLowerCase().includes(v));
+  $("#ul").innerHTML=r.length?r.map(u=>`<div class="pr2">${avh("",u.n,1)}<div><b>${esc(u.n)}</b><small>@${u.id}</small><p class="hint">${esc(u.bio)}</p></div><span class="btns"><button class="${fol(u.id)?"ghost":"b3"}" data-f="${u.id}">${fol(u.id)?"Following":"Follow"}</button><button class="ghost" data-v="${u.id}">View</button></span></div>`).join(""):`<p class="hint" style="text-align:center;padding:24px">No learner matches “${esc(v)}”. Check the ID spelling.</p>`;
+  $("#ul").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{toggleFol(b.dataset.f);draw()});
+  $("#ul").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{window._pv=b.dataset.v;tPpl(B)})};
+ $("#us").oninput=draw;draw()}
+function uview(B,u){const f=fol(u.id),P=u.ps.map((t,i)=>({id:u.id+"-"+i,who:u.n,uid:u.id,txt:t,ts:Date.now()-(i+1)*864e5,base:bs(u.id,i)}));
+ B.innerHTML=`<button class="ghost" id="bk" style="margin-top:12px">← Back to search</button><div class="ph" style="margin-top:14px"><div class="ph-top"><span class="ring">${avh("",u.n,0)}</span><div class="ph-st"><div><b>${u.ps.length}</b><span>posts</span></div><div><b>${u.d}</b><span>days done</span></div><div><b>${u.x}</b><span>XP</span></div></div></div><div class="ph-nm"><b>${esc(u.n)}</b><div class="hint">@${u.id}</div><p>${esc(u.bio)}</p></div><div class="ph-btn"><button class="${f?"ghost":"b3"}" id="fb">${f?"Following":"Follow"}</button><button class="ghost" id="mg">Message</button><button class="ghost" id="cl">Copy link</button></div></div>`+P.map(pcard).join("");
+ $("#bk").onclick=()=>{window._pv=null;tPpl(B)};$("#fb").onclick=()=>{toggleFol(u.id);uview(B,u)};$("#mg").onclick=()=>toast("Messages need a cloud account. Coming soon.");$("#cl").onclick=()=>copyL(u.id);bindP(B,()=>uview(B,u))}
 </script>
 </body>
 </html>

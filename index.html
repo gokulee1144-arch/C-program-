@@ -921,7 +921,7 @@ const copyL=id=>{const u=link(id);navigator.clipboard&&navigator.clipboard.write
 /* ---- Followers / following lists ---- */
 const FL=id=>{const A=DB.allF||[];let fo=A.filter(x=>x.to===id).map(x=>x.from),fg=A.filter(x=>x.from===id).map(x=>x.to);
  if(id===CUR){fo=fo.concat(DB.fers.map(x=>x.from));fg=fg.concat(DB.fing)}return{fo:[...new Set(fo)],fg:[...new Set(fg)]}};
-const flrow=id=>{const{fo,fg}=FL(id);return `<div class="fl-row"><button data-fl="fo" data-u="${id}"><b>${fo.length}</b> followers</button><button data-fl="fg" data-u="${id}"><b>${fg.length}</b> following</button></div>`};
+const flrow=id=>{const{fo,fg}=FL(id);return `<div class="fl-row"><button data-fl="fo" data-u="${id}"><b>${fo.length}</b> follower${fo.length===1?"":"s"}</button><button data-fl="fg" data-u="${id}"><b>${fg.length}</b> following</button></div>`};
 const bindFL=r=>r.querySelectorAll("[data-fl]").forEach(b=>b.onclick=()=>showFL(b.dataset.u,b.dataset.fl));
 function showFL(id,tab){const old=$("#flo");if(old)old.remove();const o=document.createElement("div");o.id="flo";o.className="flo";document.body.appendChild(o);
  const close=()=>{o.remove();window._flr=null};

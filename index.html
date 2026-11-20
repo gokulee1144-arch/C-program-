@@ -246,6 +246,10 @@ html:not([data-theme=light]) body{background:radial-gradient(900px 520px at 85% 
 .stvn{position:absolute;top:90px;bottom:0;width:40%;background:none;border:0;left:0;z-index:1}.stvn.r{left:auto;right:0}
 #stc{position:fixed;inset:0;z-index:95;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:16px}.stcc{width:min(420px,100%);background:var(--panel);border-radius:18px;padding:18px;display:grid;gap:10px}.stcc textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--ink);font:inherit}
 .stsw{width:36px;height:36px;border-radius:50%;border:2px solid transparent;padding:0}.stsw.on{border-color:var(--ink)}
+.fl-row{display:flex;gap:20px;margin:0 0 6px}.fl-row button{background:none;border:0;color:var(--mute);font:inherit;padding:6px 0;min-height:44px;cursor:pointer}.fl-row b{color:var(--ink);font-size:1.05rem}.fl-row button:hover b{color:var(--cy)}
+.flo{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+.fls{width:min(520px,100%);max-height:82vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:18px 18px 0 0;padding:14px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+.fl-t{display:flex;margin:6px 0 4px}.fl-t button{flex:1;min-height:46px;border:0;border-bottom:2px solid var(--line);background:none;color:var(--mute);font:inherit;cursor:pointer}.fl-t button.on{color:var(--cy);border-color:var(--cy);font-weight:700}
 </style>
 </head>
 <body>
@@ -268,7 +272,7 @@ int *p = &amp;x;
 <button class="go" id="gb"><span id="gt">Sign in</span></button><div class="or">or</div><button type="button" class="gfb" id="gfb"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.5-4.1 7-10.2 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.2C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.2C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button><div class="aerr" id="aerr" role="alert"></div></form></div></section>
 <script>
 const CUR=localStorage.getItem("cf_cur"),SK="cforge"+(CUR?":"+CUR:"");
-window.DB={users:{},posts:[],likes:{},cm:{},notifs:[],reqIn:[],reqOut:[],fing:[],fers:[],stories:[]};const DEV=localStorage.getItem("cf_dev")||(()=>{const d=Math.random().toString(36).slice(2);localStorage.setItem("cf_dev",d);return d})();const ACC=()=>DB.users;
+window.DB={users:{},posts:[],likes:{},cm:{},notifs:[],reqIn:[],reqOut:[],fing:[],fers:[],allF:[],stories:[]};const DEV=localStorage.getItem("cf_dev")||(()=>{const d=Math.random().toString(36).slice(2);localStorage.setItem("cf_dev",d);return d})();const ACC=()=>DB.users;
 window.cfPost=window.cfDelPost=window.cfLike=window.cfComment=window.cfFollow=window.cfStory=window.cfDelStory=window.cfAccept=window.cfDecline=window.cfRead=()=>{typeof toast==="function"&&toast("Still connecting. Try again in a moment.")};
 function logout(){localStorage.removeItem("cf_cur");let d=0;const f=()=>{if(!d){d=1;location.reload()}};try{window.cfFb?window.cfFb.out().then(f,f):f()}catch(e){f()}setTimeout(f,1500)}
 (function(){const A=document.getElementById("auth");
@@ -346,12 +350,13 @@ function start(u){let rt,pubP=[],myP=[],first=1,warned=0;
  const upd=()=>{window.cfBadge&&window.cfBadge();ref()},push=(toUid,type,data,id)=>setDoc(id?doc(db,"notifs",id):doc(collection(db,"notifs")),Object.assign({toUid,fromUid:u.uid,from:CUR,type,ts:Date.now(),read:false},data)).catch(()=>{});
  onSnapshot(query(collection(db,"follows"),where("fromUid","==",u.uid)),sn=>{const a=[],r=[];sn.forEach(d=>{const v=d.data();(v.status==="accepted"?a:r).push(v.to)});DB.fing=a;DB.reqOut=r;S.fol=a;upd()},bad);
  onSnapshot(query(collection(db,"follows"),where("toUid","==",u.uid)),sn=>{DB.reqIn=[];DB.fers=[];sn.forEach(d=>{const v=d.data(),o={id:d.id,from:v.from,fromUid:v.fromUid,ts:v.ts};(v.status==="pending"?DB.reqIn:DB.fers).push(o)});upd()},bad);
+ onSnapshot(query(collection(db,"follows"),where("status","==","accepted")),sn=>{DB.allF=sn.docs.map(d=>{const v=d.data();return{from:v.from,to:v.to}});ref()},bad);
  onSnapshot(query(collection(db,"notifs"),where("toUid","==",u.uid)),sn=>{DB.notifs=sn.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>b.ts-a.ts).slice(0,50);upd()},bad);
  onSnapshot(query(collection(db,"stories"),where("ts",">",Date.now()-864e5)),sn=>{DB.stories=sn.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>a.ts-b.ts);ref()},bad);
  window.cfFollow=id=>{const t=DB.users[id];if(!t||id===CUR)return;const k=doc(db,"follows",u.uid+"_"+t.uid);
   if(DB.fing.includes(id)||DB.reqOut.includes(id)){DB.fing=DB.fing.filter(z=>z!==id);DB.reqOut=DB.reqOut.filter(z=>z!==id);deleteDoc(k).catch(bad);upd();return}
   DB.reqOut=DB.reqOut.concat(id);setDoc(k,{from:CUR,fromUid:u.uid,to:id,toUid:t.uid,status:"pending",ts:Date.now()}).catch(e=>{DB.reqOut=DB.reqOut.filter(z=>z!==id);bad(e);upd()});upd()};
- window.cfAccept=r=>{DB.reqIn=DB.reqIn.filter(x=>x.id!==r.id);updateDoc(doc(db,"follows",r.id),{status:"accepted"}).then(()=>push(r.fromUid,"accepted",{})).catch(bad);upd()};
+ window.cfAccept=r=>{DB.reqIn=DB.reqIn.filter(x=>x.id!==r.id);DB.fers=DB.fers.concat(r);updateDoc(doc(db,"follows",r.id),{status:"accepted"}).then(()=>{push(r.fromUid,"accepted",{});typeof toast==="function"&&toast("@"+r.from+" is now following you")}).catch(bad);upd()};
  window.cfDecline=r=>{DB.reqIn=DB.reqIn.filter(x=>x.id!==r.id);deleteDoc(doc(db,"follows",r.id)).catch(bad);upd()};
  window.cfRead=()=>{DB.notifs.filter(n=>!n.read).slice(0,20).forEach(n=>{n.read=true;updateDoc(doc(db,"notifs",n.id),{read:true}).catch(()=>{})});window.cfBadge&&window.cfBadge()};
  window.cfStory=o=>{const r=doc(collection(db,"stories")),st={id:r.id,h:CUR,who:me().n,t:o.t,bg:o.bg,img:o.img||"",ts:Date.now()};DB.stories=DB.stories.concat(st);setDoc(r,{h:CUR,uid:u.uid,who:st.who,t:st.t,bg:st.bg,img:st.img,ts:st.ts}).catch(bad);ref()};
@@ -913,14 +918,31 @@ function bindP(B,re){B.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>
 function toggleFol(id){cfFollow(id);const e=$("#fc");if(e)e.textContent=DB.fing.length}
 const link=id=>location.origin+location.pathname+"#u-"+id;
 const copyL=id=>{const u=link(id);navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(u).then(()=>toast("Profile link copied"),()=>toast(u)):toast(u)};
+/* ---- Followers / following lists ---- */
+const FL=id=>{const A=DB.allF||[];let fo=A.filter(x=>x.to===id).map(x=>x.from),fg=A.filter(x=>x.from===id).map(x=>x.to);
+ if(id===CUR){fo=fo.concat(DB.fers.map(x=>x.from));fg=fg.concat(DB.fing)}return{fo:[...new Set(fo)],fg:[...new Set(fg)]}};
+const flrow=id=>{const{fo,fg}=FL(id);return `<div class="fl-row"><button data-fl="fo" data-u="${id}"><b>${fo.length}</b> followers</button><button data-fl="fg" data-u="${id}"><b>${fg.length}</b> following</button></div>`};
+const bindFL=r=>r.querySelectorAll("[data-fl]").forEach(b=>b.onclick=()=>showFL(b.dataset.u,b.dataset.fl));
+function showFL(id,tab){const old=$("#flo");if(old)old.remove();const o=document.createElement("div");o.id="flo";o.className="flo";document.body.appendChild(o);
+ const close=()=>{o.remove();window._flr=null};
+ const draw=()=>{const u=ACC()[id],priv=id!==CUR&&u&&ust(u).vis==="private"&&!fol(id),{fo,fg}=FL(id),L=tab==="fo"?fo:fg;
+  o.innerHTML=`<div class="fls" role="dialog" aria-label="Followers and following"><div class="npt"><b>@${esc(id)}</b><button class="ghost" id="flx" aria-label="Close">✕</button></div><div class="fl-t"><button data-t="fo" class="${tab==="fo"?"on":""}">${fo.length} Followers</button><button data-t="fg" class="${tab==="fg"?"on":""}">${fg.length} Following</button></div>`+
+  (priv?`<p class="hint" style="padding:24px;text-align:center">This account is private. Follow @${esc(id)} to see their followers and following.</p>`:
+  L.length?L.map(h=>{const a=ACC()[h],t=a?ust(a):{photo:""},nm=a?a.name:h;return `<div class="pr2">${avh(h===CUR?me().p.photo:t.photo,nm,1)}<div><b>${esc(nm)}</b><small>@${esc(h)}</small></div>${h===CUR?`<span class="hint">You</span>`:`<span class="btns" style="flex-direction:row"><button class="${fol(h)||req(h)?"ghost":"b3"}" data-f="${esc(h)}">${fb(h)}</button><button class="ghost" data-v="${esc(h)}">View</button></span>`}</div>`}).join(""):
+  `<p class="hint" style="padding:24px;text-align:center">${tab==="fo"?"No followers yet.":"Not following anyone yet."}</p>`)+`</div>`;
+  $("#flx").onclick=close;
+  o.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tab=b.dataset.t;draw()});
+  o.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{toggleFol(b.dataset.f);draw()});
+  o.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const h=b.dataset.v;close();if(location.hash==="#u-"+h)route();else location.hash="#u-"+h})};
+ o.onclick=e=>{if(e.target===o)close()};window._flr=draw;draw()}
 function profile(){const t=window._ptab||"grid",{n,p}=me(),nd=nextDay(),TB=[["grid","Progress"],["posts","Posts"],["people","People"],["settings","Settings"]];
  V.innerHTML=`<div class="ph"><div class="ph-top"><span class="avr">${avh(p.photo,n,0)}</span><div class="ph-st"><div><b>${doneN()}</b><span>days done</span></div><div><b>${S.xp}</b><span>XP</span></div><div><b id="fc">${DB.fing.length}</b><span>following</span></div></div></div>
  <div class="ph-nm"><b>${esc(n)}</b> <span class="vf" title="Learner">✓</span><div class="hint">@${esc(myId())}</div><p>${esc(p.bio||"Learning C one pointer at a time.")}</p></div>
- <div class="ph-btn"><button class="ghost" id="ed">Edit profile</button><button class="ghost" id="shr">Share profile</button><button class="ghost" id="sr" aria-label="Search people and posts" style="flex:0 0 46px;display:grid;place-items:center">${IC.search}</button></div>
+ ${flrow(myId())}<div class="ph-btn"><button class="ghost" id="ed">Edit profile</button><button class="ghost" id="shr">Share profile</button><button class="ghost" id="sr" aria-label="Search people and posts" style="flex:0 0 46px;display:grid;place-items:center">${IC.search}</button></div>
  <div class="hl">${[["🧪","Lab","#lab"],["🧠","Memory","#memlab"],["📚","Modules","#modules"],["📝","Exam","#exam"],["🤖","Guru","#guru"]].map(h=>`<a href="${h[2]}"><i>${h[0]}</i>${h[1]}</a>`).join("")}</div>
  <div class="tabs" role="tablist">${TB.map(([k,l])=>`<button role="tab" aria-selected="${k===t}" data-tb="${k}" class="${k===t?"on":""}">${IC[k]}<span>${l}</span></button>`).join("")}</div><div id="tb"></div></div>`;
  $("#ed").onclick=()=>{window._ptab="settings";window._pt="account";profile()};$("#shr").onclick=()=>copyL(myId());$("#sr").onclick=()=>{window._ptab="people";window._pv=null;profile();setTimeout(()=>{const i=$("#us");if(i){i.focus();i.scrollIntoView({block:"center"})}},30)};
- V.querySelectorAll("[data-tb]").forEach(b=>b.onclick=()=>{window._ptab=b.dataset.tb;window._pv=null;profile()});
+ bindFL(V);V.querySelectorAll("[data-tb]").forEach(b=>b.onclick=()=>{window._ptab=b.dataset.tb;window._pv=null;profile()});
  const B=$("#tb");({grid:tGrid,posts:tPosts,people:tPpl,settings:setg}[t]||tGrid)(B)}
 function tGrid(B){const nd=nextDay();B.innerHTML=`<div class="pg">${T.map((x,i)=>`<a href="#day-${i+1}" class="${S.done[i+1]?"done":i+1===nd?"cur":""}" title="${esc(x)}">${i+1}<small>${esc(x)}</small></a>`).join("")}</div>`}
 function feed(){const ph=me().p.photo;return GP().filter(x=>x.uid===CUR||(fol(x.uid)&&canSee(x))).map(x=>({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:x.uid===CUR?ph:""})).sort((a,b)=>b.ts-a.ts)}
@@ -939,8 +961,8 @@ function tPpl(B){const vid=window._pv,u0=vid&&ACC()[vid];if(u0&&u0.id!==CUR)retu
   $("#ul").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{window._pv=b.dataset.v;tPpl(B)})};
  $("#us").oninput=draw;draw()}
 function uview(B,u){const f=fol(u.id),t=ust(u),ok=t.vis==="public"||f,P=GP().filter(x=>x.uid===u.id&&canSee(x)).map(x=>({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:t.photo}));
- B.innerHTML=`<button class="ghost" id="bk" style="margin-top:12px">← Back to search</button><div class="ph" style="margin-top:14px"><div class="ph-top"><span class="avr">${avh(t.photo,u.name,0)}</span><div class="ph-st"><div><b>${ok?P.length:"–"}</b><span>posts</span></div><div><b>${ok?t.d:"–"}</b><span>days done</span></div><div><b>${ok?t.x:"–"}</b><span>XP</span></div></div></div><div class="ph-nm"><b>${esc(u.name)}</b><div class="hint">@${u.id}</div><p>${esc(t.bio)}</p></div><div class="ph-btn"><button class="${f||req(u.id)?"ghost":"b3"}" id="fb">${fb(u.id)}</button><button class="ghost" id="mg">Message</button><button class="ghost" id="cl">Copy link</button></div></div>`+(ok?P.map(o=>pcard(o)).join("")||`<p class="hint" style="text-align:center;padding:24px">No posts yet.</p>`:`<p class="hint" style="text-align:center;padding:24px">Follow @${u.id} to see their posts and progress.</p>`);
- $("#bk").onclick=()=>{window._pv=null;tPpl(B)};$("#fb").onclick=()=>{toggleFol(u.id);uview(B,u)};$("#mg").onclick=()=>toast("Messages need a cloud account. Coming soon.");$("#cl").onclick=()=>copyL(u.id);bindP(B,()=>uview(B,u))}
+ B.innerHTML=`<button class="ghost" id="bk" style="margin-top:12px">← Back to search</button><div class="ph" style="margin-top:14px"><div class="ph-top"><span class="avr">${avh(t.photo,u.name,0)}</span><div class="ph-st"><div><b>${ok?P.length:"–"}</b><span>posts</span></div><div><b>${ok?t.d:"–"}</b><span>days done</span></div><div><b>${ok?t.x:"–"}</b><span>XP</span></div></div></div><div class="ph-nm"><b>${esc(u.name)}</b><div class="hint">@${u.id}</div><p>${esc(t.bio)}</p></div>${flrow(u.id)}<div class="ph-btn"><button class="${f||req(u.id)?"ghost":"b3"}" id="fb">${fb(u.id)}</button><button class="ghost" id="mg">Message</button><button class="ghost" id="cl">Copy link</button></div></div>`+(ok?P.map(o=>pcard(o)).join("")||`<p class="hint" style="text-align:center;padding:24px">No posts yet.</p>`:`<p class="hint" style="text-align:center;padding:24px">Follow @${u.id} to see their posts and progress.</p>`);
+ $("#bk").onclick=()=>{window._pv=null;tPpl(B)};bindFL(B);$("#fb").onclick=()=>{toggleFol(u.id);uview(B,u)};$("#mg").onclick=()=>toast("Messages need a cloud account. Coming soon.");$("#cl").onclick=()=>copyL(u.id);bindP(B,()=>uview(B,u))}
 
 function postView(id){const x=GP().find(z=>z.id===id),ok=x&&canSee(x),bk=()=>{history.length>1?history.back():location.hash="#profile"};
  if(!ok){V.innerHTML=`<div class="pvh"><button class="ghost" id="bk" aria-label="Back">←</button><h2>Post</h2></div><p class="hint" style="padding:24px;text-align:center">This post isn't available.</p>`;$("#bk").onclick=bk;return}
@@ -990,7 +1012,7 @@ function scomp(){if($("#stc"))return;const o=document.createElement("div");o.id=
  $("#stq").onclick=()=>o.remove();$("#sts").onclick=()=>{const t=$("#stt").value.trim();if(!t&&!img){toast("Add text or a photo");return}cfStory({t,bg,img});toast("Story shared ✓");o.remove();sbar()}}
 $("#bell").onclick=openNotif;
 if(CUR&&localStorage.getItem("cf_ent:"+CUR)){$("#enter").style.display="none";$("#app").style.display="block";route();if(!sessionStorage.getItem("cf_wb")){sessionStorage.setItem("cf_wb","1");setTimeout(()=>toast("Welcome back, "+me().n.split(" ")[0]+" 👋"),400)}}
-window.cfRefresh=()=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;const h=(location.hash||"#home").slice(1),t=window._ptab;if(h==="home"||h.startsWith("post-")||h.startsWith("u-")||(h==="profile"&&(t==="people"||t==="posts"||t==="grid"))){const y=scrollY;route();scrollTo(0,y)}};
+window.cfRefresh=()=>{if($("#flo")&&window._flr)window._flr();const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;const h=(location.hash||"#home").slice(1),t=window._ptab;if(h==="home"||h.startsWith("post-")||h.startsWith("u-")||(h==="profile"&&(t==="people"||t==="posts"||t==="grid"))){const y=scrollY;route();scrollTo(0,y)}};
 document.addEventListener("click",e=>{if(e.target.closest("#lo"))logout()});
 </script>
 </body>

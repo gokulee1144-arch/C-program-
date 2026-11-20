@@ -246,48 +246,35 @@ int *p = &amp;x;
 <div class="af oup"><input id="an" placeholder=" " autocomplete="name" maxlength="40"><label for="an">Full name</label></div>
 <div class="af oup"><input id="ai" placeholder=" " autocomplete="username" autocapitalize="off" maxlength="24"><label for="ai">Choose a unique ID</label></div>
 <div class="af oup"><input id="ae" type="email" placeholder=" " autocomplete="email" autocapitalize="off" maxlength="80"><label for="ae">Email</label></div>
-<div class="af oin"><input id="au" placeholder=" " autocomplete="username" autocapitalize="off" maxlength="80"><label for="au">Email or username</label></div>
+<div class="af oin"><input id="au" placeholder=" " autocomplete="username" autocapitalize="off" maxlength="80"><label for="au">Email</label></div>
 <div class="af"><input id="ap" type="password" placeholder=" " autocomplete="current-password" maxlength="64"><label for="ap">Password</label><button type="button" class="eye" id="eye" aria-label="Show password">Show</button></div>
 <button type="button" class="alnk oin" id="fg">Forgot password?</button>
 <button class="go" id="gb"><span id="gt">Sign in</span></button><div class="or">or</div><button type="button" class="gfb" id="gfb"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.5-4.1 7-10.2 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.2C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.2C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button><div class="aerr" id="aerr" role="alert"></div></form></div></section>
 <script>
 const CUR=localStorage.getItem("cf_cur"),SK="cforge"+(CUR?":"+CUR:"");
-const ACC=()=>{try{return JSON.parse(localStorage.getItem("cf_users")||"{}")}catch(e){return{}}};
-function logout(){localStorage.removeItem("cf_cur");location.reload()}
+window.DB={users:{},posts:[],likes:{},cm:{}};const ACC=()=>DB.users;
+window.cfPost=window.cfDelPost=window.cfLike=window.cfComment=()=>{typeof toast==="function"&&toast("Still connecting. Try again in a moment.")};
+function logout(){localStorage.removeItem("cf_cur");let d=0;const f=()=>{if(!d){d=1;location.reload()}};try{window.cfFb?window.cfFb.out().then(f,f):f()}catch(e){f()}setTimeout(f,1500)}
 (function(){const A=document.getElementById("auth");
-if(CUR&&!ACC()[CUR]){localStorage.removeItem("cf_cur");location.reload();return}
 if(CUR){A.remove();return}
 const g=i=>A.querySelector("#"+i),er=g("aerr");let mode="in";
 async function hp(p,s){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s+p));return Array.from(new Uint8Array(b)).map(z=>z.toString(16).padStart(2,"0")).join("")}catch(e){return btoa(s+p)}}
 function setM(m){mode=m;A.classList.toggle("up",m==="up");A.querySelectorAll("[data-m]").forEach(b=>b.classList.toggle("on",b.dataset.m===m));g("ttl").textContent=g("gt").textContent=m==="up"?"Create account":"Sign in";g("s2").textContent=m==="up"?"Join CForge. Your ID lets other learners find you.":"Welcome back. Your lessons are waiting.";g("ap").autocomplete=m==="up"?"new-password":"current-password";er.textContent=""}
 A.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>setM(b.dataset.m));setM("in");
 g("eye").onclick=()=>{const i=g("ap"),h=i.type==="password";i.type=h?"text":"password";g("eye").textContent=h?"Hide":"Show"};
-g("fg").onclick=()=>{er.textContent="Password reset needs an email service. For now, create a new account."};
+g("fg").onclick=async()=>{er.textContent="";const em=g("au").value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(em)){er.textContent="Type your email above, then tap Forgot password.";return}if(!window.cfFb){er.textContent="Still connecting. Try again.";return}try{await cfFb.reset(em);er.style.color="#7df3ff";er.textContent="Reset link sent. Check your inbox and spam.";setTimeout(()=>er.style.color="",6000)}catch(x){er.textContent=x.msg}};
 g("gb").addEventListener("pointerdown",e=>{const b=e.currentTarget,r=b.getBoundingClientRect(),d=document.createElement("i");d.className="rp";d.style.left=e.clientX-r.left+"px";d.style.top=e.clientY-r.top+"px";b.appendChild(d);setTimeout(()=>d.remove(),650)});
-g("af").onsubmit=async e=>{e.preventDefault();er.textContent="";const pw=g("ap").value,U=ACC(),b=g("gb");
- if(mode==="in"){const u=g("au").value.trim().toLowerCase();if(!u||!pw){er.textContent="Enter your email or username and your password.";return}
-  const a=Object.values(U).find(z=>z.id===u||z.email===u);b.classList.add("ld");
-  if(!a||await hp(pw,a.salt)!==a.hash){b.classList.remove("ld");er.textContent="Email, username or password is not correct.";return}
-  return go(a.id)}
- const n=g("an").value.trim(),id=g("ai").value.trim().toLowerCase(),em=g("ae").value.trim().toLowerCase();
- if(n.length<2){er.textContent="Enter your full name.";return}
- if(!/^[a-z0-9_.]{3,24}$/.test(id)){er.textContent="ID needs 3 to 24 letters, numbers, dots or underscores.";return}
- if(!/^\S+@\S+\.\S+$/.test(em)){er.textContent="Enter a valid email address.";return}
- if(pw.length<6){er.textContent="Password needs at least 6 characters.";return}
- if(U[id]){er.textContent="That ID is taken. Try another.";return}
- if(Object.values(U).some(z=>z.email===em)){er.textContent="An account with this email already exists. Sign in instead.";return}
- b.classList.add("ld");const salt=Math.random().toString(36).slice(2),sp=n.split(" ");
- U[id]={id,name:n,email:em,salt,hash:await hp(pw,salt),ts:Date.now()};localStorage.setItem("cf_users",JSON.stringify(U));
- let d={};if(!localStorage.getItem("cf_legacy")){try{d=JSON.parse(localStorage.getItem("cforge")||"{}")}catch(x){}localStorage.setItem("cf_legacy","1")}
- d.pf=Object.assign({},d.pf,{fn:sp[0],ln:sp.slice(1).join(" "),email:em,id});localStorage.setItem("cforge:"+id,JSON.stringify(d));go(id)};
-
-function gUser(K){try{if(!K.email||K.email_verified===false)throw 0;const em=K.email.toLowerCase(),U=ACC();let a=Object.values(U).find(z=>z.email===em);
- if(!a){let id=em.split("@")[0].replace(/[^a-z0-9_.]/g,"").slice(0,20)||"learner";const b0=id;let n=1;while(U[id])id=b0+(n++);const nm=K.name||id,sp=nm.split(" ");
-  a=U[id]={id,name:nm,email:em,google:1,ts:Date.now()};localStorage.setItem("cf_users",JSON.stringify(U));
-  let d={};if(!localStorage.getItem("cf_legacy")){try{d=JSON.parse(localStorage.getItem("cforge")||"{}")}catch(x){}localStorage.setItem("cf_legacy","1")}
-  d.pf=Object.assign({},d.pf,{fn:sp[0],ln:sp.slice(1).join(" "),email:em,id,photo:K.picture||""});localStorage.setItem("cforge:"+id,JSON.stringify(d))}
- go(a.id)}catch(e){er.textContent="Google sign-in failed. Please try again."}}
-window.cfGoogle=gUser;window.cfErr=m=>{er.textContent=m;g("gfb").classList.remove("ld")};
+g("af").onsubmit=async e=>{e.preventDefault();er.textContent="";const pw=g("ap").value,b=g("gb");
+ if(!window.cfFb){er.textContent="Still connecting. Try again in a moment.";return}
+ let em=g("au").value.trim().toLowerCase(),n="",id="";
+ if(mode==="up"){n=g("an").value.trim();id=g("ai").value.trim().toLowerCase();em=g("ae").value.trim().toLowerCase();
+  if(n.length<2){er.textContent="Enter your full name.";return}
+  if(!/^[a-z0-9_.]{3,24}$/.test(id)){er.textContent="ID needs 3 to 24 letters, numbers, dots or underscores.";return}
+  if(!/^\S+@\S+\.\S+$/.test(em)){er.textContent="Enter a valid email address.";return}
+  if(pw.length<6){er.textContent="Password needs at least 6 characters.";return}}
+ else if(!/^\S+@\S+\.\S+$/.test(em)||!pw){er.textContent="Enter your email and your password.";return}
+ b.classList.add("ld");try{mode==="up"?await cfFb.signUp(n,id,em,pw):await cfFb.signIn(em,pw)}catch(x){b.classList.remove("ld");er.textContent=x.msg||"Something went wrong. Try again."}};
+window.cfGo=go;window.cfErr=m=>{er.textContent=m;g("gfb").classList.remove("ld");g("gb").classList.remove("ld")};
 g("gfb").onclick=()=>{er.textContent="";if(window.cfFbSign){g("gfb").classList.add("ld");window.cfFbSign()}else er.textContent="Google sign-in is still loading. Try again in a moment."};
 function go(id){localStorage.setItem("cf_cur",id);g("gt").textContent="Welcome in…";g("gb").classList.add("ld");setTimeout(()=>location.reload(),450)}
 A.addEventListener("mousemove",e=>{const s=A.querySelector(".a-stage");s.style.setProperty("--ry",((e.clientX/innerWidth-.5)*14)+"deg");s.style.setProperty("--rx",((.5-e.clientY/innerHeight)*10)+"deg");mx=e.clientX;my=e.clientY});
@@ -301,13 +288,47 @@ rs();addEventListener("resize",rs);f()})();
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc,deleteDoc,collection,onSnapshot,query,where}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCiejOPNqtM5_yo4b70oSIwq83y-ZsdMSU",authDomain:"c-progarmin.firebaseapp.com",projectId:"c-progarmin",storageBucket:"c-progarmin.firebasestorage.app",messagingSenderId:"226410285609",appId:"1:226410285609:web:b6258a68d1eea824136a38"});
-const auth=getAuth(app),pr=new GoogleAuthProvider();pr.setCustomParameters({prompt:"select_account"});
-const ok=r=>{const u=r.user;window.cfGoogle({email:u.email,email_verified:u.emailVerified,name:u.displayName,picture:u.photoURL})};
-const MSG={"auth/unauthorized-domain":"This website address is not allowed in Firebase yet. Add it under Authentication, Settings, Authorized domains.","auth/operation-not-allowed":"Google sign-in is not turned on in Firebase yet. Enable it under Authentication, Sign-in method.","auth/network-request-failed":"No internet connection. Check your network and try again.","auth/popup-closed-by-user":"Sign-in was cancelled.","auth/cancelled-popup-request":"Sign-in was cancelled."};
-window.cfFbSign=async()=>{try{ok(await signInWithPopup(auth,pr))}catch(e){if(e.code==="auth/popup-blocked"){try{await signInWithRedirect(auth,pr);return}catch(x){e=x}}window.cfErr(MSG[e.code]||"Google sign-in failed. Please try again.")}};
-if(!localStorage.getItem("cf_cur"))getRedirectResult(auth).then(r=>{if(r)ok(r)}).catch(()=>{});
+const auth=getAuth(app),db=getFirestore(app),pr=new GoogleAuthProvider(),DB=window.DB;pr.setCustomParameters({prompt:"select_account"});
+const E={"auth/email-already-in-use":"An account with this email already exists. Sign in instead.","auth/invalid-credential":"Email or password is not correct.","auth/wrong-password":"Email or password is not correct.","auth/user-not-found":"Email or password is not correct.","auth/weak-password":"Password needs at least 6 characters.","auth/invalid-email":"Enter a valid email address.","auth/too-many-requests":"Too many tries. Wait a minute and try again.","auth/unauthorized-domain":"This website address is not allowed in Firebase yet. Add it under Authentication, Settings, Authorized domains.","auth/operation-not-allowed":"This sign-in method is not turned on in Firebase yet. Enable it under Authentication, Sign-in method.","auth/network-request-failed":"No internet connection. Check your network and try again.","auth/popup-closed-by-user":"Sign-in was cancelled.","auth/cancelled-popup-request":"Sign-in was cancelled.","permission-denied":"The cloud database rules are not published yet. Publish the Firestore rules, then try again."};
+const fail=e=>{throw{msg:E[e.code]||e.msg||"Something went wrong. Please try again."}};
+const clean=t=>t.toLowerCase().replace(/[^a-z0-9_.]/g,"").slice(0,24);
+async function claim(u,name,photo){const us=await getDoc(doc(db,"users",u.uid));if(us.exists()&&us.data().id)return us.data().id;
+ let id=clean((u.email||"learner").split("@")[0])||"learner";if(id.length<3)id+="_c";const b0=id.slice(0,20);let n=1;
+ while((await getDoc(doc(db,"handles",id))).exists())id=b0+(n++);
+ await setDoc(doc(db,"handles",id),{uid:u.uid});await setDoc(doc(db,"users",u.uid),{id,name,photo:photo||"",vis:"public",d:0,x:0,ts:Date.now()});return id}
+function done(id,o){const k="cforge:"+id;if(!localStorage.getItem(k)){let d={};if(!localStorage.getItem("cf_legacy")){try{d=JSON.parse(localStorage.getItem("cforge")||"{}")}catch(x){}localStorage.setItem("cf_legacy","1")}
+ const sp=(o.name||id).split(" ");d.pf=Object.assign({},d.pf,{fn:sp[0],ln:sp.slice(1).join(" "),email:o.email,id,photo:o.photo||""});localStorage.setItem(k,JSON.stringify(d))}
+ localStorage.setItem("cf_cur",id);window.cfGo(id)}
+async function gdone(r){const u=r.user,id=await claim(u,u.displayName||clean((u.email||"learner").split("@")[0]),u.photoURL);done(id,{name:u.displayName,email:u.email,photo:u.photoURL})}
+window.cfFb={
+ async signUp(name,id,em,pw){try{if((await getDoc(doc(db,"handles",id))).exists())throw{msg:"That ID is taken. Try another."};
+  const c=await createUserWithEmailAndPassword(auth,em,pw);
+  try{await setDoc(doc(db,"handles",id),{uid:c.user.uid});await setDoc(doc(db,"users",c.user.uid),{id,name,photo:"",vis:"public",d:0,x:0,ts:Date.now()})}catch(e){await c.user.delete().catch(()=>{});throw e}
+  done(id,{name,email:em})}catch(e){fail(e)}},
+ async signIn(em,pw){try{const c=await signInWithEmailAndPassword(auth,em,pw),id=await claim(c.user,c.user.displayName||em.split("@")[0]);done(id,{name:c.user.displayName||id,email:em})}catch(e){fail(e)}},
+ async reset(em){try{await sendPasswordResetEmail(auth,em)}catch(e){fail(e)}},
+ out(){return signOut(auth)}};
+window.cfFbSign=async()=>{try{await gdone(await signInWithPopup(auth,pr))}catch(e){if(e.code==="auth/popup-blocked"){try{await signInWithRedirect(auth,pr);return}catch(x){e=x}}window.cfErr(E[e.code]||"Google sign-in failed. Please try again.")}};
+if(!localStorage.getItem("cf_cur"))getRedirectResult(auth).then(r=>{if(r)gdone(r).catch(e=>window.cfErr(E[e.code]||"Sign-in failed."))}).catch(()=>{});
+onAuthStateChanged(auth,u=>{const cur=localStorage.getItem("cf_cur");if(!u){if(cur){localStorage.removeItem("cf_cur");location.reload()}return}if(cur&&!window._cfStarted){window._cfStarted=1;start(u)}});
+function start(u){let rt,pubP=[],myP=[],first=1,warned=0;
+ const ref=()=>{clearTimeout(rt);rt=setTimeout(()=>window.cfRefresh&&window.cfRefresh(),250)},bad=e=>{if(!warned){warned=1;typeof toast==="function"&&toast(E[e.code]||"Could not load community data.")}},
+ mp=d=>{const v=d.data();return{id:d.id,uid:v.h,who:v.who,t:v.t,ts:v.ts,vis:v.vis}},mg=()=>{const m=new Map();pubP.concat(myP).forEach(p=>m.set(p.id,p));DB.posts=[...m.values()];ref()};
+ onSnapshot(collection(db,"users"),sn=>{const m={};sn.forEach(d=>{const v=d.data();if(v.id)m[v.id]=Object.assign({},v,{name:v.name||v.id,uid:d.id})});DB.users=m;
+  const me=m[CUR];if(first&&me){first=0;if(Array.isArray(me.following)){S.fol=me.following.slice();try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}}ref()},bad);
+ onSnapshot(query(collection(db,"posts"),where("vis","==","Public")),sn=>{pubP=sn.docs.map(mp);mg()},bad);
+ onSnapshot(query(collection(db,"posts"),where("uid","==",u.uid)),sn=>{myP=sn.docs.map(mp);mg()},bad);
+ onSnapshot(collection(db,"likes"),sn=>{const m={};sn.forEach(d=>{const v=d.data();(m[v.p]=m[v.p]||[]).push(v.h)});DB.likes=m;ref()},bad);
+ onSnapshot(collection(db,"comments"),sn=>{const m={};sn.forEach(d=>{const v=d.data();(m[v.p]=m[v.p]||[]).push({uid:v.h,t:v.t,ts:v.ts})});for(const k in m)m[k].sort((a,b)=>a.ts-b.ts);DB.cm=m;ref()},bad);
+ window.cfPost=(t,vis)=>{const r=doc(collection(db,"posts")),p={id:r.id,uid:CUR,who:me().n,t,ts:Date.now(),vis};DB.posts=DB.posts.concat(p);setDoc(r,{h:CUR,uid:u.uid,who:p.who,t,ts:p.ts,vis}).catch(e=>{DB.posts=DB.posts.filter(x=>x.id!==p.id);bad(e);ref()})};
+ window.cfDelPost=id=>{DB.posts=DB.posts.filter(x=>x.id!==id);deleteDoc(doc(db,"posts",id)).catch(bad)};
+ window.cfLike=id=>{const a=DB.likes[id]||[],on=!a.includes(CUR),k=doc(db,"likes",id+"_"+u.uid);DB.likes[id]=on?a.concat(CUR):a.filter(z=>z!==CUR);(on?setDoc(k,{p:id,h:CUR,uid:u.uid}):deleteDoc(k)).catch(bad)};
+ window.cfComment=(id,t)=>{const r=doc(collection(db,"comments")),ts=Date.now();DB.cm[id]=(DB.cm[id]||[]).concat({uid:CUR,t,ts});setDoc(r,{p:id,h:CUR,uid:u.uid,t,ts}).catch(bad)};
+ let st;window.cfSync=()=>{clearTimeout(st);st=setTimeout(()=>{const p=S.pf||{},o={name:me().n,bio:p.bio||"",vis:p.vis||"public",d:doneN(),x:S.xp||0,following:S.fol||[]};if(typeof p.photo==="string"&&p.photo.length<150000)o.photo=p.photo;setDoc(doc(db,"users",u.uid),o,{merge:true}).catch(bad)},1200)};
+ window.cfSync()}
 </script>
 <section id="enter" aria-label="Entry">
   <canvas id="fx"></canvas><div class="aurora"><i></i><i></i><i></i></div><div class="floor"></div>
@@ -374,7 +395,7 @@ const G=[
 [/scanf/,"scanf needs addresses: scanf(\"%d\", &n). Forgetting & is the top beginner crash.","scanf-ku address venum: scanf(\"%d\", &n). & marandha crash aagum."]];
 const S0={done:{},xp:0,streak:0,last:"",lang:"en"};
 let S;try{S=Object.assign({},S0,JSON.parse(localStorage.getItem(SK)||"{}"))}catch(e){S=Object.assign({},S0)}
-const save=()=>{try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}};
+const save=()=>{try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}window.cfSync&&window.cfSync()};
 const $=s=>document.querySelector(s),V=$("#view");
 const doneN=()=>Object.keys(S.done).length,nextDay=()=>{for(let i=1;i<=60;i++)if(!S.done[i])return i;return 60};
 const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -811,7 +832,7 @@ function pAcct(P){const{n,p,u}=me(),dn=(u&&u.displayName||"").split(" ");let pen
  <div class="pr"><span id="pp"></span><div><b>Profile picture</b><br><small class="hint">PNG or JPEG under 2 MB</small></div><span class="btns"><button class="ghost" id="up">Upload new picture</button><button class="ghost" id="dl">Delete</button></span></div><input type="file" id="fi" accept="image/png,image/jpeg" hidden></div>
  <div class="sec"><h3>Full name</h3><div class="fld two"><div><label for="fn">First name</label><input id="fn" value="${q(fv)}" maxlength="40"></div><div><label for="ln">Last name</label><input id="ln" value="${q(lv)}" maxlength="40"></div></div></div>
  <div class="sec"><h3>Contact email</h3><p class="d">Used for your certificate and progress emails.</p><div class="fld"><div><label for="em">Email</label><input id="em" type="email" value="${q(ev)}" maxlength="80" autocapitalize="off"><div class="err-t" id="eE"></div></div></div></div>
- <div class="sec"><h3>Profile ID</h3><p class="d">Other learners find you with this ID.</p><div class="fld two"><div><label for="hid">Unique ID</label><input id="hid" value="${q(p.id||myId())}" maxlength="24" autocapitalize="off"></div><div><label for="vis">Who can see your profile</label><select id="vis"><option value="public">Public</option><option value="followers">Followers only</option><option value="private">Private</option></select></div></div></div>
+ <div class="sec"><h3>Profile ID</h3><p class="d" id="hidn">Other learners find you with this ID. It cannot be changed.</p><div class="fld two"><div><label for="hid">Unique ID</label><input id="hid" value="${q(myId())}" readonly aria-describedby="hidn"></div><div><label for="vis">Who can see your profile</label><select id="vis"><option value="public">Public</option><option value="followers">Followers only</option><option value="private">Private</option></select></div></div></div>
  <div class="sec"><h3>Short bio</h3><div class="fld"><textarea id="bio" rows="3" maxlength="160" placeholder="Tell others what you are learning">${esc(p.bio||"")}</textarea></div></div>
  <div class="sec"><h3>Connected accounts</h3><p class="d">Manage your sign-in and community links.</p>
  <div class="acct"><span class="ic">G</span><div><b>Google sign-in</b><small>${u?esc(u.email||"Signed in"):"Save your progress to the cloud"}</small></div><button class="badge" id="gs">${u?"Connected":"Connect"}</button></div>
@@ -848,17 +869,17 @@ function pAbout(P){P.innerHTML=`<div class="sec"><h3>About CForge</h3><p class="
 const ic=d=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const IC={grid:ic('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>'),posts:ic('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h6"/>'),people:ic('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.5a3 3 0 010 5.6M18 14.3c1.8.8 3 2.6 3 5.7"/>'),settings:ic('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'),heart:ic('<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>'),mark:ic('<path d="M6 3h12v18l-6-4-6 4z"/>')};
 IC.chat=ic('<path d="M21 12a8 8 0 01-11.6 7.1L4 20l1.1-4.6A8 8 0 1121 12z"/>');IC.search=ic('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>');
-const myId=()=>(S.pf&&S.pf.id)||(me().n.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")||"learner")+"_c";
+const myId=()=>CUR||"learner";
 const ago=t=>{const m=Math.floor((Date.now()-t)/6e4);return m<1?"just now":m<60?m+" min ago":m<1440?Math.floor(m/60)+" hours ago":Math.floor(m/1440)+" days ago"};
 const fol=id=>(S.fol||[]).includes(id),bs=(id,i)=>(id.length*3+i*5)%17+4;
-const CM=()=>{try{return JSON.parse(localStorage.getItem("cf_comments")||"{}")}catch(e){return{}}},canSee=x=>{if(x.uid===CUR)return true;const a=ACC()[x.uid];if(a&&ust(a).vis==="private")return false;return x.vis==="Public"||(x.vis==="Followers only"&&fol(x.uid))};
-const LK=()=>{try{return JSON.parse(localStorage.getItem("cf_likes")||"{}")}catch(e){return{}}},GP=()=>{try{return JSON.parse(localStorage.getItem("cf_posts")||"[]")}catch(e){return[]}};
-const ust=u=>{let d={};try{d=JSON.parse(localStorage.getItem("cforge:"+u.id)||"{}")}catch(e){}const p=d.pf||{};return{d:Object.keys(d.done||{}).length,x:d.xp||0,bio:p.bio||"",photo:p.photo||"",vis:p.vis||"public",n:u.name}};
+const CM=()=>DB.cm,canSee=x=>{if(x.uid===CUR)return true;const a=ACC()[x.uid];if(a&&ust(a).vis==="private")return false;return x.vis==="Public"||(x.vis==="Followers only"&&fol(x.uid))};
+const LK=()=>DB.likes,GP=()=>DB.posts;
+const ust=u=>({d:u.d||0,x:u.x||0,bio:u.bio||"",photo:u.photo||"",vis:u.vis||"public",n:u.name});
 const pcard=(o,d)=>{const L=LK()[o.id]||[],lk=L.includes(CUR),bm=(S.bm||{})[o.id];return `<article class="pc"><header>${avh(o.photo||"",o.who,1)}<div><b>${esc(o.who)}</b><small>@${esc(o.uid)} · ${ago(o.ts)}</small></div>${o.uid===CUR?`<button class="ghost x" data-del="${o.id}">Delete</button>`:""}</header><p ${d?"":`data-open="${o.id}"`}>${esc(o.txt)}</p><footer><button data-lk="${o.id}" class="${lk?"on":""}" aria-pressed="${lk}" aria-label="Like">${IC.heart}<span>${L.length}</span></button>${d?"":`<button data-open="${o.id}" aria-label="Comments">${IC.chat}<span>${(CM()[o.id]||[]).length}</span></button>`}<button data-bm="${o.id}" class="${bm?"on":""}" aria-pressed="${!!bm}" aria-label="Save post">${IC.mark}</button></footer></article>`};
 function bindP(B,re){B.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{location.hash="#post-"+b.dataset.open});
- B.querySelectorAll("[data-lk]").forEach(b=>b.onclick=()=>{const m=LK(),id=b.dataset.lk,a=m[id]||[];m[id]=a.includes(CUR)?a.filter(z=>z!==CUR):a.concat(CUR);localStorage.setItem("cf_likes",JSON.stringify(m));re()});
+ B.querySelectorAll("[data-lk]").forEach(b=>b.onclick=()=>{cfLike(b.dataset.lk);re()});
  B.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>{S.bm=S.bm||{};S.bm[b.dataset.bm]=!S.bm[b.dataset.bm];save();re()});
- B.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{localStorage.setItem("cf_posts",JSON.stringify(GP().filter(x=>x.id!==b.dataset.del)));re()})}
+ B.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{cfDelPost(b.dataset.del);re()})}
 function toggleFol(id){S.fol=S.fol||[];S.fol=fol(id)?S.fol.filter(x=>x!==id):S.fol.concat(id);save();const e=$("#fc");if(e)e.textContent=S.fol.length}
 const link=id=>location.origin+location.pathname+"#u-"+id;
 const copyL=id=>{const u=link(id);navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(u).then(()=>toast("Profile link copied"),()=>toast(u)):toast(u)};
@@ -874,8 +895,8 @@ function profile(){const t=window._ptab||"grid",{n,p}=me(),nd=nextDay(),TB=[["gr
 function tGrid(B){const nd=nextDay();B.innerHTML=`<div class="pg">${T.map((x,i)=>`<a href="#day-${i+1}" class="${S.done[i+1]?"done":i+1===nd?"cur":""}" title="${esc(x)}">${i+1}<small>${esc(x)}</small></a>`).join("")}</div>`}
 function feed(){const ph=me().p.photo;return GP().filter(x=>x.uid===CUR||(fol(x.uid)&&canSee(x))).map(x=>({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:x.uid===CUR?ph:""})).sort((a,b)=>b.ts-a.ts)}
 function tPosts(B){const it=feed(),nd=nextDay();
- B.innerHTML=`<div class="pc cmp"><label for="pt" class="hint">Share what you learned today</label><textarea id="pt" rows="3" maxlength="280" placeholder="Day ${nd}: ${esc(T[nd-1])}. What clicked?"></textarea><div class="row" style="margin:8px 0 0"><select id="pa" aria-label="Audience"><option>Public</option><option>Followers only</option><option>Private</option></select><button class="b3" id="pb" style="margin-left:auto;padding:9px 20px;box-shadow:none">Post</button></div></div>`+(it.length?it.map(o=>pcard(o)).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet. Share your first win, or follow learners in People.</p>`);
- $("#pb").onclick=()=>{const v=$("#pt").value.trim();if(!v){toast("Write something first");return}const g=GP();g.unshift({id:"m"+Date.now(),uid:CUR,who:me().n,t:v,ts:Date.now(),vis:$("#pa").value});localStorage.setItem("cf_posts",JSON.stringify(g.slice(0,300)));toast("Posted ✓");tPosts(B)};
+ B.innerHTML=`<div class="pc cmp"><label for="pt" class="hint">Share what you learned today</label><textarea id="pt" rows="3" maxlength="280" placeholder="Day ${nd}: ${esc(T[nd-1])}. What clicked?"></textarea><div class="row" style="margin:8px 0 0"><select id="pa" aria-label="Audience"><option>Public</option><option>Private</option></select><button class="b3" id="pb" style="margin-left:auto;padding:9px 20px;box-shadow:none">Post</button></div></div>`+(it.length?it.map(o=>pcard(o)).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet. Share your first win, or follow learners in People.</p>`);
+ $("#pb").onclick=()=>{const v=$("#pt").value.trim();if(!v){toast("Write something first");return}cfPost(v,$("#pa").value);toast("Posted ✓");tPosts(B)};
  bindP(B,()=>tPosts(B))}
 function tPpl(B){const vid=window._pv,u0=vid&&ACC()[vid];if(u0&&u0.id!==CUR)return uview(B,u0);
  B.innerHTML=`<div class="srch"><input type="text" id="us" placeholder="Search @id, name or interest" aria-label="Search people"></div><div id="ul"></div><div id="up"></div>`;
@@ -896,20 +917,21 @@ function postView(id){const x=GP().find(z=>z.id===id),ok=x&&canSee(x),bk=()=>{hi
  const a=ACC()[x.uid],o={id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:x.uid===CUR?me().p.photo:(a?ust(a).photo:"")},C=CM()[id]||[];
  V.innerHTML=`<div class="pvh"><button class="ghost" id="bk" aria-label="Back">←</button><h2>Post</h2></div>`+pcard(o,1)+`<div class="pc"><b>Comments (${C.length})</b>${C.map(c=>`<p class="cm"><b>@${esc(c.uid)}</b> ${esc(c.t)} <small class="hint">${ago(c.ts)}</small></p>`).join("")||`<p class="hint cm">No comments yet.</p>`}<div class="row" style="margin:10px 0 0"><input id="ci" class="cin" placeholder="Add a comment" maxlength="200" aria-label="Add a comment"><button class="b3" id="cb" style="box-shadow:none;padding:9px 18px">Post</button></div></div>`;
  $("#bk").onclick=bk;bindP(V,()=>postView(id));
- $("#cb").onclick=()=>{const t=$("#ci").value.trim();if(!t){toast("Write a comment first");return}const m=CM();m[id]=(m[id]||[]).concat({uid:CUR,t,ts:Date.now()});localStorage.setItem("cf_comments",JSON.stringify(m));postView(id)}}
+ $("#cb").onclick=()=>{const t=$("#ci").value.trim();if(!t){toast("Write a comment first");return}cfComment(id,t);postView(id)}}
 
 function home(){const all=Object.values(ACC()).filter(u=>u.id!==CUR&&ust(u).vis!=="private"),ph=x=>x.uid===CUR?me().p.photo:(ACC()[x.uid]?ust(ACC()[x.uid]).photo:"");
  const urow=u=>{const t=ust(u);return `<div class="pr2">${avh(t.photo,u.name,1)}<div><b>${esc(u.name)}</b><small>@${u.id}</small><p class="hint">${esc(t.bio)}</p></div><span class="btns"><button class="${fol(u.id)?"ghost":"b3"}" data-f="${u.id}">${fol(u.id)?"Following":"Follow"}</button><button class="ghost" data-v="${u.id}">View</button></span></div>`};
  V.innerHTML=`<div class="row" style="justify-content:space-between;margin:0"><h2>Community</h2><a class="ghost" href="#dash" style="padding:8px 14px;text-decoration:none;border-radius:10px">📊 Dashboard</a></div><div class="srch"><input type="text" id="hs" placeholder="Search @id, name or post" aria-label="Search people and posts"></div>
- <div class="pc cmp" id="hc"><label for="hp" class="hint">Share what you learned today</label><textarea id="hp" rows="3" maxlength="280" placeholder="What clicked today?"></textarea><div class="row" style="margin:8px 0 0"><select id="ha" aria-label="Audience"><option>Public</option><option>Followers only</option><option>Private</option></select><button class="b3" id="hb" style="margin-left:auto;padding:9px 20px;box-shadow:none">Post</button></div></div><div id="hr"></div>`;
+ <div class="pc cmp" id="hc"><label for="hp" class="hint">Share what you learned today</label><textarea id="hp" rows="3" maxlength="280" placeholder="What clicked today?"></textarea><div class="row" style="margin:8px 0 0"><select id="ha" aria-label="Audience"><option>Public</option><option>Private</option></select><button class="b3" id="hb" style="margin-left:auto;padding:9px 20px;box-shadow:none">Post</button></div></div><div id="hr"></div>`;
  const draw=()=>{const q=$("#hs").value.trim().toLowerCase().replace(/^@/,"");$("#hc").style.display=q?"none":"";
   const pm=GP().filter(x=>canSee(x)&&(!q||(x.t+" "+x.who+" "+x.uid).toLowerCase().includes(q))).sort((a,b)=>b.ts-a.ts).slice(0,30),
    us=q?all.filter(u=>(u.id+" "+u.name+" "+ust(u).bio).toLowerCase().includes(q)):all.filter(u=>!fol(u.id)).slice(0,5);
   $("#hr").innerHTML=(us.length?`<div class="sh">${q?"People":"People to follow"}</div>`+us.map(urow).join(""):q?`<p class="hint" style="padding:16px 0">No learner matches “${esc(q)}”. Check the ID spelling.</p>`:"")+`<div class="sh">${q?"Posts":"Latest posts"}</div>`+(pm.length?pm.map(x=>pcard({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:ph(x)})).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet. Be the first to share.</p>`);
   const R=$("#hr");R.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{toggleFol(b.dataset.f);draw()});R.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{location.hash="#u-"+b.dataset.v});bindP(R,draw)};
  $("#hs").oninput=draw;
- $("#hb").onclick=()=>{const v=$("#hp").value.trim();if(!v){toast("Write something first");return}const g=GP();g.unshift({id:"m"+Date.now(),uid:CUR,who:me().n,t:v,ts:Date.now(),vis:$("#ha").value});localStorage.setItem("cf_posts",JSON.stringify(g.slice(0,300)));$("#hp").value="";toast("Posted ✓");draw()};
+ $("#hb").onclick=()=>{const v=$("#hp").value.trim();if(!v){toast("Write something first");return}cfPost(v,$("#ha").value);$("#hp").value="";toast("Posted ✓");draw()};
  draw()}
+window.cfRefresh=()=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;const h=(location.hash||"#home").slice(1),t=window._ptab;if(h==="home"||h.startsWith("post-")||h.startsWith("u-")||(h==="profile"&&(t==="people"||t==="posts"||t==="grid"))){const y=scrollY;route();scrollTo(0,y)}};
 document.addEventListener("click",e=>{if(e.target.closest("#lo"))logout()});
 </script>
 </body>

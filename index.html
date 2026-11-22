@@ -260,6 +260,9 @@ html:not([data-theme=light]) body{background:radial-gradient(900px 520px at 85% 
 .thx2{position:relative;z-index:2;color:#a39889;font-size:13px;margin:10px 0 0;text-align:center}.thx2 b{color:#ffd7b8}
 #enter{overflow-y:auto;justify-content:safe center}
 @media(max-height:820px){.cyl-xl{width:78px;height:78px}.hero-ph{width:150px;height:150px}.nm{font-size:2rem}}
+.admb{font-size:10px;padding:1px 8px;border-radius:99px;background:var(--cy);color:#1a0c00;margin-left:6px;font-weight:700;vertical-align:middle}.pimg{width:100%;border-radius:12px;margin:8px 0;display:block}.plink{display:inline-block;margin:6px 0;text-decoration:none;box-shadow:none;padding:9px 18px}
+.exb{margin-left:auto;font:700 14px ui-monospace,Consolas,monospace;color:var(--cy)}.exo{display:flex;gap:10px;align-items:center;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;margin-top:8px;cursor:pointer}.exo input{width:20px;height:20px;accent-color:var(--cy);flex:none}
+.exo.r{cursor:default}.exo.r.ok{border-color:var(--cy);background:rgba(255,122,26,.12)}.exo.r.no{border-color:var(--rd)}.exs{font:700 3rem ui-monospace,Consolas,monospace;color:var(--cy)}.exs.no{color:var(--rd)}
 </style>
 </head>
 <body>
@@ -282,7 +285,7 @@ int *p = &amp;x;
 <button class="go" id="gb"><span id="gt">Sign in</span></button><div class="or">or</div><button type="button" class="gfb" id="gfb"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.5-4.1 7-10.2 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.2C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.2C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button><div class="aerr" id="aerr" role="alert"></div></form></div></section>
 <script>
 const CUR=localStorage.getItem("cf_cur"),SK="cforge"+(CUR?":"+CUR:"");
-window.DB={users:{},posts:[],likes:{},cm:{},notifs:[],reqIn:[],reqOut:[],fing:[],fers:[],allF:[],stories:[]};const DEV=localStorage.getItem("cf_dev")||(()=>{const d=Math.random().toString(36).slice(2);localStorage.setItem("cf_dev",d);return d})();const ACC=()=>DB.users;
+window.DB={users:{},posts:[],exams:[],myRes:{},likes:{},cm:{},notifs:[],reqIn:[],reqOut:[],fing:[],fers:[],allF:[],stories:[]};const DEV=localStorage.getItem("cf_dev")||(()=>{const d=Math.random().toString(36).slice(2);localStorage.setItem("cf_dev",d);return d})();const ACC=()=>DB.users;
 window.cfPost=window.cfDelPost=window.cfLike=window.cfComment=window.cfFollow=window.cfStory=window.cfDelStory=window.cfAccept=window.cfDecline=window.cfRead=()=>{typeof toast==="function"&&toast("Still connecting. Try again in a moment.")};
 function logout(){localStorage.removeItem("cf_cur");let d=0;const f=()=>{if(!d){d=1;location.reload()}};try{window.cfFb?window.cfFb.out().then(f,f):f()}catch(e){f()}setTimeout(f,1500)}
 (function(){const A=document.getElementById("auth");
@@ -346,13 +349,16 @@ if(!localStorage.getItem("cf_cur"))getRedirectResult(auth).then(r=>{if(r)gdone(r
 onAuthStateChanged(auth,u=>{const cur=localStorage.getItem("cf_cur");if(!u){if(cur){localStorage.removeItem("cf_cur");location.reload()}return}if(cur&&!window._cfStarted){window._cfStarted=1;start(u)}});
 function start(u){let rt,pubP=[],myP=[],first=1,warned=0;
  const ref=()=>{clearTimeout(rt);rt=setTimeout(()=>window.cfRefresh&&window.cfRefresh(),250)},bad=e=>{if(!warned){warned=1;typeof toast==="function"&&toast(E[e.code]||"Could not load community data.")}},
- mp=d=>{const v=d.data();return{id:d.id,uid:v.h,who:v.who,t:v.t,ts:v.ts,vis:v.vis,au:v.uid}},mg=()=>{const m=new Map();pubP.concat(myP).forEach(p=>m.set(p.id,p));DB.posts=[...m.values()];ref()};
+ mp=d=>{const v=d.data();return{id:d.id,uid:v.h,who:v.who,t:v.t,ts:v.ts,vis:v.vis,au:v.uid,adm:!!v.adm,img:v.img||"",link:v.lk||""}},mg=()=>{const m=new Map();pubP.concat(myP).forEach(p=>m.set(p.id,p));DB.posts=[...m.values()];ref()};
  onSnapshot(collection(db,"users"),sn=>{const m={};sn.forEach(d=>{const v=d.data();if(v.id)m[v.id]=Object.assign({},v,{name:v.name||v.id,uid:d.id})});DB.users=m;
   const me=m[CUR];if(first&&me){first=0;if(Array.isArray(me.following)){S.fol=me.following.slice();try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}}ref()},bad);
  onSnapshot(query(collection(db,"posts"),where("vis","==","Public")),sn=>{pubP=sn.docs.map(mp);mg()},bad);
  onSnapshot(query(collection(db,"posts"),where("uid","==",u.uid)),sn=>{myP=sn.docs.map(mp);mg()},bad);
  onSnapshot(collection(db,"likes"),sn=>{const m={};sn.forEach(d=>{const v=d.data();(m[v.p]=m[v.p]||[]).push(v.h)});DB.likes=m;ref()},bad);
  onSnapshot(collection(db,"comments"),sn=>{const m={};sn.forEach(d=>{const v=d.data();(m[v.p]=m[v.p]||[]).push({uid:v.h,t:v.t,ts:v.ts})});for(const k in m)m[k].sort((a,b)=>a.ts-b.ts);DB.cm=m;ref()},bad);
+ onSnapshot(collection(db,"exams"),sn=>{DB.exams=sn.docs.map(d=>Object.assign({id:d.id},d.data()));ref()},bad);
+ onSnapshot(query(collection(db,"examResults"),where("uid","==",u.uid)),sn=>{const m={};sn.forEach(d=>{m[d.data().exam]=d.data()});DB.myRes=m;ref()},bad);
+ window.cfSubmitExam=(ex,r)=>{const o=Object.assign({exam:ex.id,examTitle:ex.title,uid:u.uid,h:CUR,name:me().n,ts:Date.now()},r);DB.myRes[ex.id]=o;return setDoc(doc(db,"examResults",ex.id+"_"+u.uid),o).catch(e=>{delete DB.myRes[ex.id];bad(e);throw e})};
  window.cfPost=(t,vis)=>{const r=doc(collection(db,"posts")),p={id:r.id,uid:CUR,who:me().n,t,ts:Date.now(),vis,au:u.uid};DB.posts=DB.posts.concat(p);setDoc(r,{h:CUR,uid:u.uid,who:p.who,t,ts:p.ts,vis}).catch(e=>{DB.posts=DB.posts.filter(x=>x.id!==p.id);bad(e);ref()})};
  window.cfDelPost=id=>{DB.posts=DB.posts.filter(x=>x.id!==id);deleteDoc(doc(db,"posts",id)).catch(bad)};
  window.cfLike=id=>{const a=DB.likes[id]||[],on=!a.includes(CUR),k=doc(db,"likes",id+"_"+u.uid);DB.likes[id]=on?a.concat(CUR):a.filter(z=>z!==CUR);const pp=DB.posts.find(x=>x.id===id);if(on&&pp&&pp.au&&pp.au!==u.uid)push(pp.au,"like",{p:id},id+"_"+u.uid);(on?setDoc(k,{p:id,h:CUR,uid:u.uid}):deleteDoc(k)).catch(bad)};
@@ -360,7 +366,7 @@ function start(u){let rt,pubP=[],myP=[],first=1,warned=0;
  const upd=()=>{window.cfBadge&&window.cfBadge();ref()},push=(toUid,type,data,id)=>setDoc(id?doc(db,"notifs",id):doc(collection(db,"notifs")),Object.assign({toUid,fromUid:u.uid,from:CUR,type,ts:Date.now(),read:false},data)).catch(()=>{});
  onSnapshot(query(collection(db,"follows"),where("fromUid","==",u.uid)),sn=>{const a=[],r=[];sn.forEach(d=>{const v=d.data();(v.status==="accepted"?a:r).push(v.to)});DB.fing=a;DB.reqOut=r;S.fol=a;upd()},bad);
  onSnapshot(query(collection(db,"follows"),where("toUid","==",u.uid)),sn=>{DB.reqIn=[];DB.fers=[];sn.forEach(d=>{const v=d.data(),o={id:d.id,from:v.from,fromUid:v.fromUid,ts:v.ts};(v.status==="pending"?DB.reqIn:DB.fers).push(o)});upd()},bad);
- onSnapshot(query(collection(db,"follows"),where("status","==","accepted")),sn=>{DB.allF=sn.docs.map(d=>{const v=d.data();return{from:v.from,to:v.to}});ref()},bad);
+
  onSnapshot(query(collection(db,"notifs"),where("toUid","==",u.uid)),sn=>{DB.notifs=sn.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>b.ts-a.ts).slice(0,50);upd()},bad);
  onSnapshot(query(collection(db,"stories"),where("ts",">",Date.now()-864e5)),sn=>{DB.stories=sn.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>a.ts-b.ts);ref()},bad);
  window.cfFollow=id=>{const t=DB.users[id];if(!t||id===CUR)return;const k=doc(db,"follows",u.uid+"_"+t.uid);
@@ -393,7 +399,7 @@ function start(u){let rt,pubP=[],myP=[],first=1,warned=0;
 <nav id="nav"><b class="brand"><span class="cyl cyl-s" aria-hidden="true"></span><span>CForge<small>Cyber Intelligence</small></span></b><span class="navr"><button class="bell" id="bell" aria-label="Notifications">🔔<i class="bb" id="bb" style="display:none">0</i></button><a href="#profile" id="meA" aria-label="Profile and settings"></a><button class="mbtn" id="mb" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button></span></nav>
 <div id="drawer" aria-hidden="true"><div class="dr-in"><div class="dr-h"><a href="#profile" id="meB"></a><div><b id="meN">Learner</b><small id="meS">Profile & settings</small></div></div>
 <div class="clg"><span class="cyl cyl-s" role="img" aria-label="Sengunthar Engineering College Cyber Intelligence logo"></span><div><b>Cyber Intelligence</b><small>Sengunthar Engineering College</small></div></div>
-<div id="dlist"><a href="#home">🏠 Community</a><a href="#dash">📊 Dashboard</a><a href="#lab">🧪 Training lab</a><a href="#modules">📚 Modules</a><a href="#roadmap">🗺️ Roadmap</a><a href="#memlab">🧠 Memory lab</a><a href="#exam">📝 Exam</a><a href="#guru">🤖 C Guru</a><a href="#profile">👤 Profile & settings</a><div class="dr-sep"></div>
+<div id="dlist"><a href="#home">🏠 Community & exams</a><a href="#dash">📊 Dashboard</a><a href="#lab">🧪 Training lab</a><a href="#modules">📚 Modules</a><a href="#roadmap">🗺️ Roadmap</a><a href="#memlab">🧠 Memory lab</a><a href="#exam">📝 Exam</a><a href="#guru">🤖 C Guru</a><a href="#profile">👤 Profile & settings</a><div class="dr-sep"></div>
 <a href="https://www.instagram.com/gokul_efx_" target="_blank" rel="noopener">📸 Instagram</a><a href="https://chat.whatsapp.com/IVixTTUCdaa59vDV9jiHwh" target="_blank" rel="noopener">💬 WhatsApp group</a><button id="ab">👤 About Gokul</button><button id="lo">🚪 Log out</button><button id="th" aria-label="Switch light or dark theme">🌓 Theme</button></div></div></div>
 <main id="view"></main>
 <footer class="ftr"><span class="cyl cyl-s" aria-hidden="true"></span><span><b>Cyber Intelligence</b> · Sengunthar Engineering College<br>🙏 Special thanks to <b>Moule Sir</b></span></footer>
@@ -467,12 +473,13 @@ function route(){
   document.querySelectorAll("#dlist a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+(h.startsWith("day")?"roadmap":h)));
   if(h.startsWith("day-")){pause();return lesson(+h.slice(4)||1)}
   if(h.startsWith("post-"))return postView(h.slice(5));
+  if(h.startsWith("cexam-"))return cexam(h.slice(6));
   if(h.startsWith("u-")){window._ptab="people";window._pv=h.slice(2);return profile()}window._pv=null;
   ({home,dash,roadmap,memlab,guru,lab,modules,exam,profile}[h]||home)();window.scrollTo(0,0)}
 addEventListener("hashchange",route);
 function dash(){const n=doneN(),nd=nextDay();
-  V.innerHTML=`${emberCard()}<div class="card hero"><h2>Write your first C program in <em class="it">10 minutes</em></h2><p>No install. Run Hello, change it, fix a bug, earn your first badge.</p><svg viewBox="0 0 600 90" role="img" aria-label="Source code goes through the compiler to the CPU and becomes output"><g font-family="monospace" font-size="13" text-anchor="middle"><g style="fill:var(--panel);stroke:var(--cy)" stroke-width="1.5"><rect x="6" y="24" width="108" height="44" rx="10"/><rect x="166" y="24" width="108" height="44" rx="10"/><rect x="326" y="24" width="108" height="44" rx="10"/><rect x="486" y="24" width="108" height="44" rx="10"/></g><g style="fill:var(--ink)"><text x="60" y="51">main.c</text><text x="220" y="51">compiler</text><text x="380" y="51">CPU</text><text x="540" y="51">output</text></g></g><g style="stroke:var(--bl)" stroke-width="2"><path d="M116 46h48M276 46h48M436 46h48"/></g><circle cy="46" r="6" style="fill:var(--or)"><animate attributeName="cx" values="60;540" dur="4s" repeatCount="indefinite"/></circle></svg><div class="row"><a href="#lab"><button class="b3">Start the 10-minute lab</button></a><a href="#modules"><button class="ghost">See all 12 modules</button></a></div></div>
-  <h2 style="margin-top:20px">Dashboard</h2>
+  V.innerHTML=`${emberCard()}<div class="card hero"><h2>Learn C <em class="it">free</em>. Write your first program in 5 minutes.</h2><p>No setup. Real code, instant feedback, and hints that don’t spoil the answer.</p><div class="tg" style="justify-content:flex-start;max-width:none;margin:0 0 8px"><span>No install</span><span>Learn by doing</span><span>Instant feedback</span><span>Streaks &amp; XP</span></div><svg viewBox="0 0 600 90" role="img" aria-label="Source code goes through the compiler to the CPU and becomes output"><g font-family="monospace" font-size="13" text-anchor="middle"><g style="fill:var(--panel);stroke:var(--cy)" stroke-width="1.5"><rect x="6" y="24" width="108" height="44" rx="10"/><rect x="166" y="24" width="108" height="44" rx="10"/><rect x="326" y="24" width="108" height="44" rx="10"/><rect x="486" y="24" width="108" height="44" rx="10"/></g><g style="fill:var(--ink)"><text x="60" y="51">main.c</text><text x="220" y="51">compiler</text><text x="380" y="51">CPU</text><text x="540" y="51">output</text></g></g><g style="stroke:var(--bl)" stroke-width="2"><path d="M116 46h48M276 46h48M436 46h48"/></g><circle cy="46" r="6" style="fill:var(--or)"><animate attributeName="cx" values="60;540" dur="4s" repeatCount="indefinite"/></circle></svg><div class="row"><a href="#lab"><button class="b3">Start the 10-minute lab</button></a><a href="#modules"><button class="ghost">See all 12 modules</button></a></div></div>
+  ${tryCard()}${dailyCard()}<h2 style="margin-top:20px">Dashboard</h2>
   <div class="grid"><div class="card stat"><b>${nd}</b><span>Today’s lesson</span></div><div class="card stat"><b>${S.streak}</b><span>Day streak</span></div><div class="card stat"><b>${S.xp}</b><span>XP</span></div><div class="card stat"><b>${n}/60</b><span>Days done</span></div></div>
   <div class="card" style="margin-top:12px"><b>${esc(T[nd-1])}</b><div class="bar"><div style="width:${n/60*100}%"></div></div>
   <div class="row"><a href="#day-${nd}"><button class="b3">Continue lesson</button></a><a href="#memlab"><button class="b3 pu">Memory lab</button></a><a href="#guru"><button class="b3 or">Ask C Guru</button></a></div></div>
@@ -731,7 +738,7 @@ function selfTest(){const bad=[];
  chk("switch+string",'#include <stdio.h>\nint main(){char s[10]="hey";int x=2;switch(x){case 1:printf("a");break;case 2:printf("%s!",s);break;}return 0;}',"",r=>!r.err&&r.out==="hey!");
  return bad}
 
-function lab(){S.lab=S.lab||{};S.sv=S.sv||{};let k=0,hi=0,tmr;
+function lab(){S.lab=S.lab||{};S.sv=S.sv||{};let k=+window._labk||0,hi=0,tmr;window._labk=0;
  const codes=EX.map((e,i)=>S.sv[i]?S.sv[i].c:e.code),ins=EX.map((e,i)=>S.sv[i]?S.sv[i].i:e.cases[0][0]);
  const keep=(o,x)=>{const old=S.sv[k]||{};S.sv[k]={c:codes[k]||"",i:ins[k]||"",o:(o===undefined?old.o:o)||"",x:(x===undefined?old.x:x)?1:0};save()};
  const draw=()=>{const e=EX[k],sv=S.sv[k]||{};
@@ -924,7 +931,7 @@ const fol=id=>DB.fing.includes(id),req=id=>DB.reqOut.includes(id),fb=id=>fol(id)
 const CM=()=>DB.cm,canSee=x=>{if(x.uid===CUR)return true;const a=ACC()[x.uid];if(a&&ust(a).vis==="private")return false;return x.vis==="Public"||(x.vis==="Followers only"&&fol(x.uid))};
 const LK=()=>DB.likes,GP=()=>DB.posts;
 const ust=u=>({d:u.d||0,x:u.x||0,bio:u.bio||"",photo:u.photo||"",vis:u.vis||"public",n:u.name});
-const pcard=(o,d)=>{const L=LK()[o.id]||[],lk=L.includes(CUR),bm=(S.bm||{})[o.id];return `<article class="pc"><header>${avh(o.photo||"",o.who,1)}<div><b>${esc(o.who)}</b><small>@${esc(o.uid)} · ${ago(o.ts)}</small></div>${o.uid===CUR?`<button class="ghost x" data-del="${o.id}">Delete</button>`:""}</header><p ${d?"":`data-open="${o.id}"`}>${esc(o.txt)}</p><footer><button data-lk="${o.id}" class="${lk?"on":""}" aria-pressed="${lk}" aria-label="Like">${IC.heart}<span>${L.length}</span></button>${d?"":`<button data-open="${o.id}" aria-label="Comments">${IC.chat}<span>${(CM()[o.id]||[]).length}</span></button>`}<button data-bm="${o.id}" class="${bm?"on":""}" aria-pressed="${!!bm}" aria-label="Save post">${IC.mark}</button></footer></article>`};
+const pcard=(o,d)=>{const L=LK()[o.id]||[],lk=L.includes(CUR),bm=(S.bm||{})[o.id];return `<article class="pc"><header>${avh(o.photo||"",o.who,1)}<div><b>${esc(o.who)}${o.adm?' <span class="admb">Admin</span>':""}</b><small>${o.adm?"":"@"+esc(o.uid)+" · "}${ago(o.ts)}</small></div>${o.uid===CUR?`<button class="ghost x" data-del="${o.id}">Delete</button>`:""}</header><p ${d?"":`data-open="${o.id}"`}>${esc(o.txt)}</p>${safeUrl(o.img)?`<img class="pimg" src="${q(safeUrl(o.img))}" alt="" loading="lazy">`:""}${safeUrl(o.link)?`<a class="b3 plink" href="${q(safeUrl(o.link))}" target="_blank" rel="noopener">Open link</a>`:""}<footer><button data-lk="${o.id}" class="${lk?"on":""}" aria-pressed="${lk}" aria-label="Like">${IC.heart}<span>${L.length}</span></button>${d?"":`<button data-open="${o.id}" aria-label="Comments">${IC.chat}<span>${(CM()[o.id]||[]).length}</span></button>`}<button data-bm="${o.id}" class="${bm?"on":""}" aria-pressed="${!!bm}" aria-label="Save post">${IC.mark}</button></footer></article>`};
 function bindP(B,re){B.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{location.hash="#post-"+b.dataset.open});
  B.querySelectorAll("[data-lk]").forEach(b=>b.onclick=()=>{cfLike(b.dataset.lk);re()});
  B.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>{S.bm=S.bm||{};S.bm[b.dataset.bm]=!S.bm[b.dataset.bm];save();re()});
@@ -932,35 +939,18 @@ function bindP(B,re){B.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>
 function toggleFol(id){cfFollow(id);const e=$("#fc");if(e)e.textContent=DB.fing.length}
 const link=id=>location.origin+location.pathname+"#u-"+id;
 const copyL=id=>{const u=link(id);navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(u).then(()=>toast("Profile link copied"),()=>toast(u)):toast(u)};
-/* ---- Followers / following lists ---- */
-const FL=id=>{const A=DB.allF||[];let fo=A.filter(x=>x.to===id).map(x=>x.from),fg=A.filter(x=>x.from===id).map(x=>x.to);
- if(id===CUR){fo=fo.concat(DB.fers.map(x=>x.from));fg=fg.concat(DB.fing)}return{fo:[...new Set(fo)],fg:[...new Set(fg)]}};
-const flrow=id=>{const{fo,fg}=FL(id);return `<div class="fl-row"><button data-fl="fo" data-u="${id}"><b>${fo.length}</b> follower${fo.length===1?"":"s"}</button><button data-fl="fg" data-u="${id}"><b>${fg.length}</b> following</button></div>`};
-const bindFL=r=>r.querySelectorAll("[data-fl]").forEach(b=>b.onclick=()=>showFL(b.dataset.u,b.dataset.fl));
-function showFL(id,tab){const old=$("#flo");if(old)old.remove();const o=document.createElement("div");o.id="flo";o.className="flo";document.body.appendChild(o);
- const close=()=>{o.remove();window._flr=null};
- const draw=()=>{const u=ACC()[id],priv=id!==CUR&&u&&ust(u).vis==="private"&&!fol(id),{fo,fg}=FL(id),L=tab==="fo"?fo:fg;
-  o.innerHTML=`<div class="fls" role="dialog" aria-label="Followers and following"><div class="npt"><b>@${esc(id)}</b><button class="ghost" id="flx" aria-label="Close">✕</button></div><div class="fl-t"><button data-t="fo" class="${tab==="fo"?"on":""}">${fo.length} Followers</button><button data-t="fg" class="${tab==="fg"?"on":""}">${fg.length} Following</button></div>`+
-  (priv?`<p class="hint" style="padding:24px;text-align:center">This account is private. Follow @${esc(id)} to see their followers and following.</p>`:
-  L.length?L.map(h=>{const a=ACC()[h],t=a?ust(a):{photo:""},nm=a?a.name:h;return `<div class="pr2">${avh(h===CUR?me().p.photo:t.photo,nm,1)}<div><b>${esc(nm)}</b><small>@${esc(h)}</small></div>${h===CUR?`<span class="hint">You</span>`:`<span class="btns" style="flex-direction:row"><button class="${fol(h)||req(h)?"ghost":"b3"}" data-f="${esc(h)}">${fb(h)}</button><button class="ghost" data-v="${esc(h)}">View</button></span>`}</div>`}).join(""):
-  `<p class="hint" style="padding:24px;text-align:center">${tab==="fo"?"No followers yet.":"Not following anyone yet."}</p>`)+`</div>`;
-  $("#flx").onclick=close;
-  o.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tab=b.dataset.t;draw()});
-  o.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{toggleFol(b.dataset.f);draw()});
-  o.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const h=b.dataset.v;close();if(location.hash==="#u-"+h)route();else location.hash="#u-"+h})};
- o.onclick=e=>{if(e.target===o)close()};window._flr=draw;draw()}
 function profile(){const t=window._ptab||"grid",{n,p}=me(),nd=nextDay(),TB=[["grid","Progress"],["posts","Posts"],["people","People"],["settings","Settings"]];
- V.innerHTML=`<div class="ph"><div class="ph-top"><span class="avr">${avh(p.photo,n,0)}</span><div class="ph-st"><div><b>${doneN()}</b><span>days done</span></div><div><b>${S.xp}</b><span>XP</span></div><div><b id="fc">${DB.fing.length}</b><span>following</span></div></div></div>
+ V.innerHTML=`<div class="ph"><div class="ph-top"><span class="avr">${avh(p.photo,n,0)}</span><div class="ph-st"><div><b>${doneN()}</b><span>days done</span></div><div><b>${S.xp}</b><span>XP</span></div><div><b>${Object.keys(S.lab||{}).length}</b><span>labs done</span></div></div></div>
  <div class="ph-nm"><b>${esc(n)}</b> <span class="vf" title="Learner">✓</span><div class="hint">@${esc(myId())}</div><p>${esc(p.bio||"Learning C one pointer at a time.")}</p></div>
- ${flrow(myId())}<div class="ph-btn"><button class="ghost" id="ed">Edit profile</button><button class="ghost" id="shr">Share profile</button><button class="ghost" id="sr" aria-label="Search people and posts" style="flex:0 0 46px;display:grid;place-items:center">${IC.search}</button></div>
+ <div class="ph-btn"><button class="ghost" id="ed">Edit profile</button><button class="ghost" id="shr">Share profile</button><button class="ghost" id="sr" aria-label="Search people and posts" style="flex:0 0 46px;display:grid;place-items:center">${IC.search}</button></div>
  <div class="hl">${[["🧪","Lab","#lab"],["🧠","Memory","#memlab"],["📚","Modules","#modules"],["📝","Exam","#exam"],["🤖","Guru","#guru"]].map(h=>`<a href="${h[2]}"><i>${h[0]}</i>${h[1]}</a>`).join("")}</div>
  <div class="tabs" role="tablist">${TB.map(([k,l])=>`<button role="tab" aria-selected="${k===t}" data-tb="${k}" class="${k===t?"on":""}">${IC[k]}<span>${l}</span></button>`).join("")}</div><div id="tb"></div></div>`;
  $("#ed").onclick=()=>{window._ptab="settings";window._pt="account";profile()};$("#shr").onclick=()=>copyL(myId());$("#sr").onclick=()=>{window._ptab="people";window._pv=null;profile();setTimeout(()=>{const i=$("#us");if(i){i.focus();i.scrollIntoView({block:"center"})}},30)};
- bindFL(V);V.querySelectorAll("[data-tb]").forEach(b=>b.onclick=()=>{window._ptab=b.dataset.tb;window._pv=null;profile()});
+ V.querySelectorAll("[data-tb]").forEach(b=>b.onclick=()=>{window._ptab=b.dataset.tb;window._pv=null;profile()});
  const B=$("#tb");({grid:tGrid,posts:tPosts,people:tPpl,settings:setg}[t]||tGrid)(B)}
 function tGrid(B){const nd=nextDay();B.innerHTML=`<div class="pg">${T.map((x,i)=>`<a href="#day-${i+1}" class="${S.done[i+1]?"done":i+1===nd?"cur":""}" title="${esc(x)}">${i+1}<small>${esc(x)}</small></a>`).join("")}</div>`}
-function feed(){const ph=me().p.photo;return GP().filter(x=>x.uid===CUR||(fol(x.uid)&&canSee(x))).map(x=>({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:x.uid===CUR?ph:""})).sort((a,b)=>b.ts-a.ts)}
-function tPosts(B){const it=feed(),nd=nextDay();
+function feed(){const ph=me().p.photo;return GP().filter(x=>x.uid===CUR||(fol(x.uid)&&canSee(x))).map(x=>({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,adm:x.adm,img:x.img,link:x.link,photo:x.uid===CUR?ph:""})).sort((a,b)=>b.ts-a.ts)}
+function tPosts_old(B){const it=feed(),nd=nextDay();
  B.innerHTML=`<div class="pc cmp"><label for="pt" class="hint">Share what you learned today</label><textarea id="pt" rows="3" maxlength="280" placeholder="Day ${nd}: ${esc(T[nd-1])}. What clicked?"></textarea><div class="row" style="margin:8px 0 0"><select id="pa" aria-label="Audience"><option>Public</option><option>Private</option></select><button class="b3" id="pb" style="margin-left:auto;padding:9px 20px;box-shadow:none">Post</button></div></div>`+(it.length?it.map(o=>pcard(o)).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet. Share your first win, or follow learners in People.</p>`);
  $("#pb").onclick=()=>{const v=$("#pt").value.trim();if(!v){toast("Write something first");return}cfPost(v,$("#pa").value);toast("Posted ✓");tPosts(B)};
  bindP(B,()=>tPosts(B))}
@@ -968,38 +958,70 @@ function tPpl(B){const vid=window._pv,u0=vid&&ACC()[vid];if(u0&&u0.id!==CUR)retu
  B.innerHTML=`<div class="srch"><input type="text" id="us" placeholder="Search @id, name or interest" aria-label="Search people"></div><div id="ul"></div><div id="up"></div>`;
  const all=Object.values(ACC()).filter(u=>u.id!==CUR&&ust(u).vis!=="private");
  const draw=()=>{const v=$("#us").value.trim().toLowerCase().replace(/^@/,""),r=all.filter(u=>!v||(u.id+" "+u.name+" "+ust(u).bio).toLowerCase().includes(v));
-  $("#ul").innerHTML=r.length?r.map(u=>{const t=ust(u);return `<div class="pr2">${avh(t.photo,u.name,1)}<div><b>${esc(u.name)}</b><small>@${u.id}</small><p class="hint">${esc(t.bio)}</p></div><span class="btns"><button class="${fol(u.id)||req(u.id)?"ghost":"b3"}" data-f="${u.id}">${fb(u.id)}</button><button class="ghost" data-v="${u.id}">View</button></span></div>`}).join(""):`<p class="hint" style="text-align:center;padding:24px">${all.length?"No learner matches “"+esc(v)+"”. Check the ID spelling.":"No other learners yet. People who create an account on this device appear here."}</p>`;
+  $("#ul").innerHTML=r.length?r.map(u=>{const t=ust(u);return `<div class="pr2">${avh(t.photo,u.name,1)}<div><b>${esc(u.name)}</b><small>@${u.id}</small><p class="hint">${esc(t.bio)}</p></div><span class="btns"><button class="ghost" data-v="${u.id}">View</button></span></div>`}).join(""):`<p class="hint" style="text-align:center;padding:24px">${all.length?"No learner matches “"+esc(v)+"”. Check the ID spelling.":"No other learners yet. People who create an account on this device appear here."}</p>`;
   const q=v,pm=GP().filter(x=>x.uid!==CUR&&canSee(x)&&(!q||(x.t+" "+x.who+" "+x.uid).toLowerCase().includes(q))).sort((a,b)=>b.ts-a.ts).slice(0,10);
   $("#up").innerHTML=pm.length?`<div class="sh">${q?"Posts":"Latest posts"}</div>`+pm.map(x=>pcard({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:""})).join(""):"";bindP($("#up"),draw);
   $("#ul").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{toggleFol(b.dataset.f);draw()});
   $("#ul").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{window._pv=b.dataset.v;tPpl(B)})};
  $("#us").oninput=draw;draw()}
 function uview(B,u){const f=fol(u.id),t=ust(u),ok=t.vis==="public"||f,P=GP().filter(x=>x.uid===u.id&&canSee(x)).map(x=>({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:t.photo}));
- B.innerHTML=`<button class="ghost" id="bk" style="margin-top:12px">← Back to search</button><div class="ph" style="margin-top:14px"><div class="ph-top"><span class="avr">${avh(t.photo,u.name,0)}</span><div class="ph-st"><div><b>${ok?P.length:"–"}</b><span>posts</span></div><div><b>${ok?t.d:"–"}</b><span>days done</span></div><div><b>${ok?t.x:"–"}</b><span>XP</span></div></div></div><div class="ph-nm"><b>${esc(u.name)}</b><div class="hint">@${u.id}</div><p>${esc(t.bio)}</p></div>${flrow(u.id)}<div class="ph-btn"><button class="${f||req(u.id)?"ghost":"b3"}" id="fb">${fb(u.id)}</button><button class="ghost" id="mg">Message</button><button class="ghost" id="cl">Copy link</button></div></div>`+(ok?P.map(o=>pcard(o)).join("")||`<p class="hint" style="text-align:center;padding:24px">No posts yet.</p>`:`<p class="hint" style="text-align:center;padding:24px">Follow @${u.id} to see their posts and progress.</p>`);
- $("#bk").onclick=()=>{window._pv=null;tPpl(B)};bindFL(B);$("#fb").onclick=()=>{toggleFol(u.id);uview(B,u)};$("#mg").onclick=()=>toast("Messages need a cloud account. Coming soon.");$("#cl").onclick=()=>copyL(u.id);bindP(B,()=>uview(B,u))}
+ B.innerHTML=`<button class="ghost" id="bk" style="margin-top:12px">← Back to search</button><div class="ph" style="margin-top:14px"><div class="ph-top"><span class="avr">${avh(t.photo,u.name,0)}</span><div class="ph-st"><div><b>${ok?P.length:"–"}</b><span>posts</span></div><div><b>${ok?t.d:"–"}</b><span>days done</span></div><div><b>${ok?t.x:"–"}</b><span>XP</span></div></div></div><div class="ph-nm"><b>${esc(u.name)}</b><div class="hint">@${u.id}</div><p>${esc(t.bio)}</p></div><div class="ph-btn"><button class="ghost" id="mg">Message</button><button class="ghost" id="cl">Copy link</button></div></div>`+(ok?P.map(o=>pcard(o)).join("")||`<p class="hint" style="text-align:center;padding:24px">No posts yet.</p>`:`<p class="hint" style="text-align:center;padding:24px">Follow @${u.id} to see their posts and progress.</p>`);
+ $("#bk").onclick=()=>{window._pv=null;tPpl(B)};$("#mg").onclick=()=>toast("Messages need a cloud account. Coming soon.");$("#cl").onclick=()=>copyL(u.id);bindP(B,()=>uview(B,u))}
 
 function postView(id){const x=GP().find(z=>z.id===id),ok=x&&canSee(x),bk=()=>{history.length>1?history.back():location.hash="#profile"};
  if(!ok){V.innerHTML=`<div class="pvh"><button class="ghost" id="bk" aria-label="Back">←</button><h2>Post</h2></div><p class="hint" style="padding:24px;text-align:center">This post isn't available.</p>`;$("#bk").onclick=bk;return}
- const a=ACC()[x.uid],o={id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:x.uid===CUR?me().p.photo:(a?ust(a).photo:"")},C=CM()[id]||[];
- V.innerHTML=`<div class="pvh"><button class="ghost" id="bk" aria-label="Back">←</button><h2>Post</h2></div>`+pcard(o,1)+`<div class="pc"><b>Comments (${C.length})</b>${C.map(c=>`<p class="cm"><b>@${esc(c.uid)}</b> ${esc(c.t)} <small class="hint">${ago(c.ts)}</small></p>`).join("")||`<p class="hint cm">No comments yet.</p>`}<div class="row" style="margin:10px 0 0"><input id="ci" class="cin" placeholder="Add a comment" maxlength="200" aria-label="Add a comment"><button class="b3" id="cb" style="box-shadow:none;padding:9px 18px">Post</button></div></div>`;
- $("#bk").onclick=bk;bindP(V,()=>postView(id));
- $("#cb").onclick=()=>{const t=$("#ci").value.trim();if(!t){toast("Write a comment first");return}cfComment(id,t);postView(id)}}
+ const a=ACC()[x.uid],o={id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,adm:x.adm,img:x.img,link:x.link,photo:x.uid===CUR?me().p.photo:(a?ust(a).photo:"")},C=CM()[id]||[];
+ V.innerHTML=`<div class="pvh"><button class="ghost" id="bk" aria-label="Back">←</button><h2>Post</h2></div>`+pcard(o,1)+`<div class="pc"><b>Comments (${C.length})</b>${C.map(c=>`<p class="cm"><b>@${esc(c.uid)}</b> ${esc(c.t)} <small class="hint">${ago(c.ts)}</small></p>`).join("")||`<p class="hint cm">No comments yet.</p>`}<p class="hint" style="margin-top:10px">Comments are turned off. Only admins can post.</p></div>`;
+ $("#bk").onclick=bk;bindP(V,()=>postView(id));}
 
-function home(){const all=Object.values(ACC()).filter(u=>u.id!==CUR&&ust(u).vis!=="private"),ph=x=>x.uid===CUR?me().p.photo:(ACC()[x.uid]?ust(ACC()[x.uid]).photo:"");
- const urow=u=>{const t=ust(u);return `<div class="pr2">${avh(t.photo,u.name,1)}<div><b>${esc(u.name)}</b><small>@${u.id}</small><p class="hint">${esc(t.bio)}</p></div><span class="btns"><button class="${fol(u.id)||req(u.id)?"ghost":"b3"}" data-f="${u.id}">${fb(u.id)}</button><button class="ghost" data-v="${u.id}">View</button></span></div>`};
- V.innerHTML=`<div class="row" style="justify-content:space-between;margin:0"><h2>Community</h2><a class="ghost" href="#dash" style="padding:8px 14px;text-decoration:none;border-radius:10px">📊 Dashboard</a></div><div class="sbar" id="stb"></div><div class="srch"><input type="text" id="hs" placeholder="Search @id, name or post" aria-label="Search people and posts"></div>
- <div class="pc cmp" id="hc"><label for="hp" class="hint">Share what you learned today</label><textarea id="hp" rows="3" maxlength="280" placeholder="What clicked today?"></textarea><div class="row" style="margin:8px 0 0"><select id="ha" aria-label="Audience"><option>Public</option><option>Private</option></select><button class="b3" id="hb" style="margin-left:auto;padding:9px 20px;box-shadow:none">Post</button></div></div><div id="hr"></div>`;
- const draw=()=>{const q=$("#hs").value.trim().toLowerCase().replace(/^@/,"");$("#hc").style.display=q?"none":"";
-  const pm=GP().filter(x=>canSee(x)&&(!q||(x.t+" "+x.who+" "+x.uid).toLowerCase().includes(q))).sort((a,b)=>b.ts-a.ts).slice(0,30),
-   us=q?all.filter(u=>(u.id+" "+u.name+" "+ust(u).bio).toLowerCase().includes(q)):all.filter(u=>!fol(u.id)).slice(0,5);
-  $("#hr").innerHTML=(us.length?`<div class="sh">${q?"People":"People to follow"}</div>`+us.map(urow).join(""):q?`<p class="hint" style="padding:16px 0">No learner matches “${esc(q)}”. Check the ID spelling.</p>`:"")+`<div class="sh">${q?"Posts":"Latest posts"}</div>`+(pm.length?pm.map(x=>pcard({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,photo:ph(x)})).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet. Be the first to share.</p>`);
-  const R=$("#hr");R.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{toggleFol(b.dataset.f);draw()});R.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{location.hash="#u-"+b.dataset.v});bindP(R,draw)};
- $("#hs").oninput=draw;sbar();
- $("#hb").onclick=()=>{const v=$("#hp").value.trim();if(!v){toast("Write something first");return}cfPost(v,$("#ha").value);$("#hp").value="";toast("Posted ✓");draw()};
- draw()}
+const safeUrl=u=>/^https:\/\//.test(String(u||""))?String(u):"";
+const po=x=>({id:x.id,who:x.who,uid:x.uid,txt:x.t,ts:x.ts,adm:x.adm,img:x.img,link:x.link,photo:x.uid===CUR?me().p.photo:(ACC()[x.uid]?ust(ACC()[x.uid]).photo:"")});
+function scoreExam(e,ans){const total=e.qs.length;let score=0;e.qs.forEach((q,i)=>{if(ans[i]===q.a)score++});const pct=total?Math.round(score/total*100):0;return{score,total,pct,pass:pct>=(e.pass||0)}}
+function home(){const all=Object.values(ACC()).filter(u=>u.id!==CUR&&ust(u).vis!=="private");
+ V.innerHTML=`<div class="row" style="justify-content:space-between;margin:0"><h2>Community</h2><a class="ghost" href="#dash" style="padding:8px 14px;text-decoration:none;border-radius:10px">📊 Dashboard</a></div><div id="ex"></div><div class="srch"><input type="text" id="hs" placeholder="Search @id, name or post" aria-label="Search people and posts"></div><div id="hr"></div>`;
+ const draw=()=>{const q=$("#hs").value.trim().toLowerCase().replace(/^@/,""),exs=(DB.exams||[]).filter(e=>e.status==="live").sort((a,b)=>b.ts-a.ts);
+  $("#ex").innerHTML=q?"":`<div class="sh">📝 Exams</div>`+(exs.length?exs.map(e=>{const r=(DB.myRes||{})[e.id];return `<div class="pc exc"><b>${esc(e.title)}</b><p class="hint">${esc(String(e.desc||"").slice(0,140))}</p><small class="hint">${(e.qs||[]).length} questions · ${e.mins} min · pass mark ${e.pass}%</small><div class="row" style="margin:8px 0 0"><span class="hint">${r?`Your score: ${r.score}/${r.total} (${r.pct}%) · ${r.pass?"Passed ✓":"Not passed"}`:"Not attempted yet"}</span><button class="b3" data-ex="${esc(e.id)}" style="margin-left:auto;box-shadow:none;padding:9px 18px">${r?"View result":"Start exam"}</button></div></div>`}).join(""):`<p class="hint" style="padding:8px 0 16px">No exams yet. New exams from your admin appear here.</p>`);
+  const pm=GP().filter(x=>canSee(x)&&(!q||(x.t+" "+x.who+" "+x.uid).toLowerCase().includes(q))).sort((a,b)=>b.ts-a.ts).slice(0,30),us=q?all.filter(u=>(u.id+" "+u.name+" "+ust(u).bio).toLowerCase().includes(q)):[];
+  $("#hr").innerHTML=(us.length?`<div class="sh">People</div>`+us.map(u=>{const t=ust(u);return `<div class="pr2">${avh(t.photo,u.name,1)}<div><b>${esc(u.name)}</b><small>@${u.id}</small><p class="hint">${esc(t.bio)}</p></div><span class="btns"><button class="ghost" data-v="${u.id}">View</button></span></div>`}).join(""):q?`<p class="hint" style="padding:16px 0">No learner matches “${esc(q)}”.</p>`:"")+`<div class="sh">${q?"Posts":"Latest posts"}</div>`+(pm.length?pm.map(x=>pcard(po(x))).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet.</p>`);
+  V.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{location.hash="#u-"+b.dataset.v});V.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{location.hash="#cexam-"+b.dataset.ex});bindP($("#hr"),draw)};
+ $("#hs").oninput=draw;draw()}
+function cexam(id){const e=(DB.exams||[]).find(x=>x.id===id),bk=()=>{location.hash="#home"},hd=t=>`<div class="pvh"><button class="ghost" id="bk" aria-label="Back">←</button><h2>${esc(t)}</h2></div>`;window._exRun=false;
+ if(!e){V.innerHTML=hd("Exam")+`<p class="hint" style="padding:24px;text-align:center">${(DB.exams||[]).length?"This exam isn’t available.":"Loading exams…"}</p>`;$("#bk").onclick=bk;return}
+ const r=(DB.myRes||{})[id];if(r)return cres(e,r);
+ if(e.status!=="live"){V.innerHTML=hd(e.title)+`<p class="hint" style="padding:24px;text-align:center">This exam is closed.</p>`;$("#bk").onclick=bk;return}
+ V.innerHTML=hd(e.title)+`<div class="pc"><p>${esc(e.desc||"")}</p><p class="hint">${e.qs.length} questions · ${e.mins} minutes · pass mark ${e.pass}%.<br>You can attempt this exam once. The timer starts when you press Start.</p><button class="b3" id="exs">Start exam</button></div>`;
+ $("#bk").onclick=bk;$("#exs").onclick=()=>cexRun(e)}
+function cexRun(e){window._exRun=true;let left=Math.max(1,e.mins|0)*60,done=false,t;
+ V.innerHTML=`<div class="pvh"><h2>${esc(e.title)}</h2><span class="exb" id="et"></span></div>`+e.qs.map((q,i)=>`<div class="pc"><b>${i+1}. ${esc(q.q)}</b>${q.o.map((o,j)=>`<label class="exo"><input type="radio" name="q${i}" value="${j}"><span>${esc(o)}</span></label>`).join("")}</div>`).join("")+`<button class="b3" id="exf" style="width:100%">Submit exam</button>`;
+ const back=()=>{done=false;window._exRun=true;t=setInterval(tk,1000)};
+ const fin=auto=>{if(done)return;const ans=e.qs.map((q,i)=>{const c=V.querySelector(`input[name=q${i}]:checked`);return c?+c.value:-1});
+  if(!auto&&ans.includes(-1)&&!confirm("Some questions are unanswered. Submit anyway?"))return;
+  done=true;clearInterval(t);window._exRun=false;const res=Object.assign({ans},scoreExam(e,ans));
+  if(!window.cfSubmitExam){toast("Still connecting. Try again in a moment.");back();return}
+  window.cfSubmitExam(e,res).then(()=>cres(e,Object.assign({exam:e.id},res)),()=>{toast("Could not save your result. Check your connection.");back()})};
+ const tk=()=>{const el=$("#et");if(!el){clearInterval(t);window._exRun=false;return}left--;el.textContent="⏱ "+Math.floor(left/60)+":"+String(left%60).padStart(2,"0");if(left<=0)fin(true)};
+ t=setInterval(tk,1000);tk();$("#exf").onclick=()=>fin(false)}
+function cres(e,r){window._exRun=false;
+ V.innerHTML=`<div class="pvh"><button class="ghost" id="bk" aria-label="Back">←</button><h2>${esc(e.title)}</h2></div><div class="pc" style="text-align:center"><div class="exs ${r.pass?"":"no"}">${r.pct}%</div><b>${r.score} of ${r.total} correct · ${r.pass?"Passed ✓":"Not passed"}</b><p class="hint">Pass mark ${e.pass}%. Your result is saved. Only your first attempt counts.</p></div><div class="sh">Review</div>`+e.qs.map((q,i)=>{const a=(r.ans||[])[i];return `<div class="pc"><b>${i+1}. ${esc(q.q)}</b>${q.o.map((o,j)=>`<p class="exo r ${j===q.a?"ok":j===a?"no":""}">${j===q.a?"✓":j===a?"✗":"•"} ${esc(o)}</p>`).join("")}${q.e?`<p class="hint">💡 ${esc(q.e)}</p>`:""}</div>`}).join("");
+ $("#bk").onclick=()=>{location.hash="#home"}}
+function tPosts(B){const it=feed();B.innerHTML=`<p class="hint" style="padding:12px 0">Only admins can post now. Your older posts stay here.</p>`+(it.length?it.map(o=>pcard(o)).join(""):`<p class="hint" style="text-align:center;padding:24px">No posts yet.</p>`);bindP(B,()=>tPosts(B))}
+const TRYH=["Replace the three underscores (___) with a word.","The program should print exactly: Hello, World!","Type World where the underscores are."];
+function tryCard(){setTimeout(bindTry,0);return `<div class="card tryc" style="margin-top:12px"><b>⚡ Try C right now</b><p class="hint">Fix the blank, press Run, see the result. No install.</p><textarea class="code" id="tc" rows="6" wrap="off" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Try C code">#include <stdio.h>
+int main() {
+  printf("Hello, ___!\\n");
+  return 0;
+}</textarea><div class="row"><button class="b3" id="tr">Run</button><button class="ghost" id="th2">Hint</button></div><pre class="out" id="to">Your output appears here.</pre><p class="hint" id="tm2"></p></div>`}
+function dailyCard(){const k=Math.floor(Date.now()/864e5)%EX.length,e=EX[k];return `<div class="card" style="margin-top:12px"><b>🔥 Daily challenge</b><p>${esc(e.t)}: ${esc(e.d)}</p><button class="b3" id="dc" data-k="${k}">Solve it</button></div>`}
+function bindTry(){const run=$("#tr");if(!run)return;let hi=0;
+ run.onclick=()=>{const r=runC($("#tc").value,""),o=$("#to"),m=$("#tm2");
+  if(r.err){o.className="out err";o.textContent=(r.err.kind==="compile"?"Compile error":"Error")+(r.err.line?" on line "+r.err.line:"")+": "+r.err.msg;m.textContent="";return}
+  o.className="out";o.textContent=r.out||"(nothing printed)";const ok=norm(r.out)==="Hello, World!";
+  m.textContent=ok?"Correct! You just ran your first C program."+(S.tryok?"":" +10 XP"):"Not yet. Press Hint for help.";
+  if(ok&&!S.tryok){S.tryok=1;S.xp+=10;save()}};
+ $("#th2").onclick=()=>{$("#tm2").textContent="Hint "+(hi+1)+": "+TRYH[Math.min(hi++,2)]};
+ const dc=$("#dc");if(dc)dc.onclick=()=>{window._labk=+dc.dataset.k;location.hash="#lab"}}
 
-const BG=["linear-gradient(135deg,#ff7a1a,#ff3b5c)","linear-gradient(135deg,#00B8D4,#8A2BE2)","linear-gradient(135deg,#1db954,#0a6)","linear-gradient(135deg,#2b1306,#050505)"];
-window.cfBadge=()=>{const n=DB.reqIn.length+DB.notifs.filter(x=>!x.read&&!(x.type==="login"&&x.dev===DEV)).length,b=$("#bb");if(b){b.textContent=n>9?"9+":n;b.style.display=n?"":"none"}if($("#np")&&window.cfNp)window.cfNp()};
+
 function openNotif(){let o=$("#np");if(o){o.remove();return}o=document.createElement("div");o.id="np";o.setAttribute("role","dialog");o.setAttribute("aria-label","Notifications");document.body.appendChild(o);
  const T={like:n=>"❤️ <b>@"+esc(n.from)+"</b> liked your post",comment:n=>"💬 <b>@"+esc(n.from)+"</b> commented: “"+esc(n.t||"")+"”",accepted:n=>"✅ <b>@"+esc(n.from)+"</b> accepted your follow request",login:n=>"🔐 New sign-in on another device ("+esc(n.ua||"unknown")+"). Not you? Change your password."};
  window.cfNp=()=>{const R=DB.reqIn,N=DB.notifs.filter(x=>!(x.type==="login"&&x.dev===DEV));
@@ -1026,7 +1048,7 @@ function scomp(){if($("#stc"))return;const o=document.createElement("div");o.id=
  $("#stq").onclick=()=>o.remove();$("#sts").onclick=()=>{const t=$("#stt").value.trim();if(!t&&!img){toast("Add text or a photo");return}cfStory({t,bg,img});toast("Story shared ✓");o.remove();sbar()}}
 $("#bell").onclick=openNotif;
 if(CUR&&localStorage.getItem("cf_ent:"+CUR)){$("#enter").style.display="none";$("#app").style.display="block";route();if(!sessionStorage.getItem("cf_wb")){sessionStorage.setItem("cf_wb","1");setTimeout(()=>toast("Welcome back, "+me().n.split(" ")[0]+" 👋"),400)}}
-window.cfRefresh=()=>{if($("#flo")&&window._flr)window._flr();const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;const h=(location.hash||"#home").slice(1),t=window._ptab;if(h==="home"||h.startsWith("post-")||h.startsWith("u-")||(h==="profile"&&(t==="people"||t==="posts"||t==="grid"))){const y=scrollY;route();scrollTo(0,y)}};
+window.cfRefresh=()=>{if(window._exRun&&$("#et"))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;const h=(location.hash||"#home").slice(1),t=window._ptab;if(h==="home"||h.startsWith("post-")||h.startsWith("u-")||(h==="profile"&&(t==="people"||t==="posts"||t==="grid"))){const y=scrollY;route();scrollTo(0,y)}};
 document.addEventListener("click",e=>{if(e.target.closest("#lo"))logout()});
 </script>
 </body>
